@@ -160,6 +160,26 @@ When dispatching to sub-skills, ALWAYS pass the selected architecture pattern.
 
 **Architecture Context Format:** When dispatching, include `[architecture=<pattern>]` so sub-skills know WHERE to put generated code.
 
+## MCP Integration (v3.1)
+
+ModSmith integrates with external MCP servers for enhanced accuracy. See `integration/mcp-ecosystem.md` for full setup.
+
+### MCP-Aware Generation
+**Before generating any code that references vanilla Minecraft classes, check if mcdev-mcp is available:**
+```
+mcdev-mcp tools:
+  get_minecraft_source(className) → Exact method signatures
+  search_minecraft_code(query)    → Find classes by name
+  analyze_mixin(mixinCode)        → Validate before compile
+```
+
+**When MCPs are available:**
+- ✅ Mixin: Verify method signatures with `get_minecraft_source` before writing
+- ✅ API changes: Use `compare_versions` when upgrading between MC versions
+- ✅ Documentation: Use mcmodding-mcp `search_fabric_docs` for official API refs
+
+**When MCPs are unavailable:** Fall back to `fabric-mc-mod-development` skill + `auto-fix` error database.
+
 ## Phase 3: Closed-Loop Pipeline
 
 After generating all code and resources, ModSmith runs the build→fix→rebuild loop:
