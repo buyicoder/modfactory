@@ -1,0 +1,58 @@
+{
+  "name": "Tinkers Construct",
+  "repo": "SlimeKnights/TinkersConstruct",
+  "branch": "1.20.1",
+  "mc_version": "1.20.1",
+  "loader": "multi-loader",
+  "mappings": "mojang",
+  "package": "slimeknights.tconstruct",
+  "size": "very large (300+ classes)",
+  "architecture": {
+    "pattern": "self-contained feature modules",
+    "key_insight": "Each feature is a fully self-contained module with its own item/, client/, data/, menu/, network/, recipe/ sub-packages. Modules share code through library/.",
+    "packages": {
+      "root": "TConstruct.java main class",
+      "tools": "Complete tool system: item/, modifiers/, stats/, recipe/, menu/, network/, logic/, client/, data/",
+      "smeltery": "Smeltery multiblock system (similar internal structure to tools)",
+      "gadgets": "Utility items/blocks",
+      "tables": "Crafting station blocks",
+      "fluids": "Fluid definitions and behaviors",
+      "world": "World generation features",
+      "library": "Shared framework: materials/, modifiers/, module/, recipe/, utils/, json/, fluid/",
+      "shared": "Shared registrations and common code between modules",
+      "plugin": "Plugin system for addons (JEI, etc.)"
+    }
+  },
+  "registration": {
+    "strategy": "module-level registration",
+    "pattern": "Each module has its own registration constants. TinkerTools.java holds tool items, TinkerToolParts.java holds tool part items. Library provides shared registration utilities.",
+    "key_files": [
+      "tools/TinkerTools.java",
+      "tools/TinkerToolParts.java",
+      "tools/TinkerModifiers.java",
+      "tools/ToolDefinitions.java"
+    ]
+  },
+  "key_patterns": [
+    {
+      "name": "Self-Contained Feature Module",
+      "description": "Each top-level package (tools, smeltery, gadgets) is a complete mini-mod with its own internal structure. This is the MOST scalable pattern for very large mods with 300+ classes.",
+      "internal_structure": "item/ + client/ + data/ + menu/ + network/ + recipe/ + logic/"
+    },
+    {
+      "name": "Library as Internal Framework",
+      "description": "library/ provides shared base classes, utilities, and abstractions. All feature modules depend ON library, but NOT on each other. This enforces clean module boundaries.",
+      "key_library_packages": ["materials/", "modifiers/", "module/", "recipe/", "tools/", "utils/"]
+    },
+    {
+      "name": "Modifier System Design",
+      "description": "Tinkers' modifier system is a composable behavior pattern. Each modifier is a separate class that can be applied to any tool. This is the most complex and elegant system in MC modding.",
+      "pattern": "Modifier interface → concrete implementations → applied via tool stats → rendered via client/"
+    }
+  ],
+  "extracted_templates": [
+    "self_contained_module/",
+    "library_framework/",
+    "modifier_system/"
+  ]
+}

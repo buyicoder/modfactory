@@ -1,0 +1,45 @@
+{
+  "name": "Supplementaries",
+  "repo": "MehVahdJukaar/Supplementaries",
+  "branch": "1.21.1",
+  "mc_version": "1.21.1",
+  "loader": "multi-loader",
+  "mappings": "mojang",
+  "package": "net.mehvahdjukaar.supplementaries",
+  "size": "large (150+ classes)",
+  "architecture": {
+    "pattern": "registry-separated + feature-common split",
+    "key_insight": "Registration is COMPLETELY separated from logic. reg/ package contains ALL ModXxx.java registry classes. common/ contains ALL game logic organized by feature (block/, items/, entities/, events/, network/, fluids/, worldgen/).",
+    "packages": {
+      "root": "Supplementaries.java main class",
+      "reg": "ALL registrations: ModRegistry, ModBlocks, ModItems, ModEntities, ModFluids, ModCreativeTabs, ModSounds, ModParticles, ModTags, ModRecipes, ModEnchantments, ModCommands, ModWorldgen, ModComponents, ModDamageSources, ModMenuTypes, ModConstants, ModSetup, ModTextures, ModSoftFluids, LootTablesInjects, ClientRegistry — 22 registry classes",
+      "common": "ALL game logic by feature: block/, items/, entities/, events/, network/, fluids/, worldgen/, commands/, inventories/, misc/, utils/",
+      "client": "Client-only rendering and GUI",
+      "integration": "JEI/REI/EMI/ModMenu compatibility",
+      "mixins": "All Mixin injections",
+      "configs": "Configuration system",
+      "api": "Public API"
+    }
+  },
+  "registration": {
+    "strategy": "complete separation of registry and logic",
+    "pattern": "reg/ package is a PURE DATA layer — it only registers things, no game logic. common/ package is PURE LOGIC — it references registrations from reg/ but never calls register(). This separation is extremely clean.",
+    "registry_count": 22
+  },
+  "key_patterns": [
+    {
+      "name": "Registry-Logic Separation",
+      "description": "The cleanest separation in MC modding: reg/ has zero game logic, common/ has zero registry calls. This is better than Farmer's Delight's registry/ pattern because the registry package is purely declarative.",
+      "benefit": "You can change registration API without touching any game logic, and vice versa."
+    },
+    {
+      "name": "Multi-Loader Architecture",
+      "description": "Supplementaries supports both Fabric AND Forge from the same codebase. The common/ package is shared. Platform-specific code is minimal and abstracted.",
+      "approach": "common/ for shared logic, fabric/ and forge/ subprojects for loader-specific glue"
+    }
+  ],
+  "extracted_templates": [
+    "registry_logic_separation/",
+    "multiloader_architecture/"
+  ]
+}
