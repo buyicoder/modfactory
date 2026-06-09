@@ -23,7 +23,8 @@
       "skills/command-generator/SKILL.md",
       "skills/datagen-generator/SKILL.md",
       "skills/network-generator/SKILL.md",
-      "skills/integrity-checker/SKILL.md"
+      "skills/integrity-checker/SKILL.md",
+      "skills/texture-ai-generator/SKILL.md"
     ],
     "mcp": {
       "config": "mcp/mcp-servers.json"
