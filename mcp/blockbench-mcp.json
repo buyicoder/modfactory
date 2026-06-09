@@ -1,11 +1,10 @@
 {
   "mcpServers": {
     "blockbench": {
-      "command": "node",
-      "args": ["D:/MC/blockbench-mcp/apps/mcp-server/dist/index.js"],
+      "command": "npx",
+      "args": ["tsx", "D:/MC/blockbench-mcp/apps/mcp-server/src/index.ts"],
       "env": {
-        "BLOCKBENCH_PORT": "3000",
-        "BLOCKBENCH_ENDPOINT": "/bb-mcp"
+        "BLOCKBENCH_PORT": "3000"
       }
     }
   }
