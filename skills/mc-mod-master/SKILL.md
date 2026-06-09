@@ -13,7 +13,9 @@ The single entry point for all MC mod development. Decomposes natural language r
 - `texture-generator` for textures
 - `item-generator` for items/tools/weapons/armor
 - `block-generator` for blocks
+- `entity-design-expert` for polished custom mobs/bosses with reference assets, model adaptation, textures, animations, and runtime verification
 - `entity-generator` for entities
+- `blockbench-animator` for Blockbench entity animation clips
 - `gameplay-generator` for gameplay systems
 
 **REQUIRED KNOWLEDGE:** `fabric-mc-mod-development` skill for API patterns, mappings, and conventions.
@@ -159,6 +161,19 @@ When dispatching to sub-skills, ALWAYS pass the selected architecture pattern.
 ```
 
 **Architecture Context Format:** When dispatching, include `[architecture=<pattern>]` so sub-skills know WHERE to put generated code.
+
+### Custom Entity with Animations
+```
+"Make a stone guardian mob with heavy walking and slam attack animations"
+→ entity-design-expert: own full asset/code/runtime loop
+  → entity-designer: blueprint + asset contract
+  → official asset search/export: reference model, texture size, UV layout
+  → theme retexture: same dimensions, same UV layout
+  → model adaptation: Java geometry + entity dimensions
+  → blockbench-animator: idle, walk, attack, hurt, death clips
+  → entity-generator: entity logic + renderer + runtime animation bindings [architecture=<pattern>]
+  → integrity-checker + build + runClient verification
+```
 
 ## MCP Integration (v3.1)
 

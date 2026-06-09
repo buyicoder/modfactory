@@ -146,7 +146,23 @@ Fix: .build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(MOD_ID, name)
 ```
 Pattern: "无法将类SpawnEggItem中的构造器应用到给定类型"
 Fix: SpawnEggItem(new Item.Settings()) — EntityType NOT in constructor
-     Use SpawnEggItem.forEntity(entityType) static factory instead
+     For custom entities, do NOT use forEntity(entityType); see next rule
+```
+
+### Custom SpawnEggItem forEntity NPE (1.21.11)
+```
+Pattern: runClient crash:
+         NullPointerException at Registry.register / Items.register
+         stack includes SpawnEggItem.forEntity(customEntity)
+Root Cause: SpawnEggItem.forEntity() only returns vanilla egg mappings.
+           Custom entity types return null and crash during item registration.
+Fix: Create ModSpawnEggItem extends SpawnEggItem:
+     - constructor takes EntityType<?> + Settings
+     - super(settings)
+     - override getEntityType(ItemStack) to return stored entity type
+     - override isOfSameEntityType(ItemStack, EntityType<?>)
+     Register with:
+     settings -> new ModSpawnEggItem(ModEntityTypes.MY_ENTITY, settings)
 ```
 
 ### Loot Table API (1.21.11)

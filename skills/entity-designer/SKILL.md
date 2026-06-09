@@ -105,6 +105,15 @@ Blueprint passed to `entity-generator` which now knows exactly what to build.
 User: "I want a thunder golem"
     │
     ▼
+entity-design-expert ← ORCHESTRATES COMPLETE ENTITY LOOP
+    │
+    ├── Establish source-of-truth asset contract
+    ├── Search/export official reference model and texture
+    ├── Preserve texture dimensions and UV layout during retheme
+    ├── Adapt Java model geometry and entity dimensions
+    └── Own runtime verification
+    │
+    ▼
 entity-designer ← RUNS FIRST
     │
     ├── Ask clarifying questions
@@ -118,12 +127,21 @@ blockbench-mcp ← MODEL + TEXTURE GENERATION (if available)
     ├── Create 3D model from blueprint specs
     ├── Apply texture palette
     ├── Capture preview screenshot → show user
-    └── Export EntityModel Java code
+    └── Keep model open for animation
     │
     ▼
-entity-generator ← RECEIVES COMPLETE BLUEPRINT + EXPORTED CODE
+blockbench-animator ← ANIMATION CLIPS
+    │
+    ├── Inspect real bone/group names with list_outline
+    ├── Create required clips: idle / walk / attack / hurt / death
+    ├── Verify animation lengths, loop modes, and keyframe counts
+    └── Record clip names in blueprint
+    │
+    ▼
+entity-generator ← RECEIVES COMPLETE BLUEPRINT + EXPORTED CODE/ANIMATION NAMES
     │
     ├── Model code → from blockbench-mcp export
+    ├── Animations → from blockbench-animator clip list
     ├── Texture → from blockbench-mcp or GearFactory
     ├── Sounds → ModSounds + sound JSONs
     ├── Spawn method → spawn egg or structure

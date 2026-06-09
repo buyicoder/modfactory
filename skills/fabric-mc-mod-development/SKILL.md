@@ -116,6 +116,7 @@ src/main/resources/assets/MODID/
 ├── textures/
 │   ├── item/                 ← Item icons (16x16 PNG)
 │   ├── block/                ← Block textures (16x16 PNG)
+│   ├── entity/               ← Entity textures (match model texture size!)
 │   └── entity/equipment/
 │       ├── humanoid/         ← Armor upper body (64x32 PNG)
 │       └── humanoid_leggings/← Armor leggings (64x32 PNG)
@@ -123,9 +124,16 @@ src/main/resources/assets/MODID/
 └── lang/                     ← en_us.json / zh_cn.json
 
 src/main/resources/data/MODID/
+├── loot_table/
+│   ├── blocks/               ← Block drops
+│   └── entities/             ← Entity drops
 ├── recipe/                   ← Crafting recipes
-└── tags/item/                ← Custom item tags
+└── tags/
+    ├── item/                 ← Custom item tags
+    └── block/                ← Mineable / tool tier tags
 ```
+
+**Resource closure rule:** If something is registered in Java, it needs its companion resources before the feature is complete. The current Fabric docs show the same loop for blocks: register → add creative tab entry → add translation → add model/texture/item mapping → add blockstate → add loot table → load the game to verify.
 
 ## Yarn vs Mojang Mappings (Critical!)
 
@@ -209,6 +217,53 @@ ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
 
 Group constants: `ItemGroups.INGREDIENTS`, `BUILDING_BLOCKS`, `FOOD_AND_DRINK`, `TOOLS`, `COMBAT`
 
+## Custom Spawn Eggs (1.21.11 Yarn)
+
+`SpawnEggItem.forEntity(entityType)` only returns an existing vanilla spawn egg mapping. For a custom entity it can return `null`, which compiles but crashes during static item registration.
+
+Use a custom subclass that stores the entity type:
+
+```java
+public class ModSpawnEggItem extends SpawnEggItem {
+    private final EntityType<?> entityType;
+
+    public ModSpawnEggItem(EntityType<?> entityType, Settings settings) {
+        super(settings);
+        this.entityType = entityType;
+    }
+
+    @Override
+    public EntityType<?> getEntityType(ItemStack stack) {
+        return this.entityType;
+    }
+
+    @Override
+    public boolean isOfSameEntityType(ItemStack stack, EntityType<?> type) {
+        return this.entityType == type;
+    }
+}
+```
+
+Register with the standard item factory:
+
+```java
+public static final Item DARK_GOLEM_SPAWN_EGG = register(
+    "dark_golem_spawn_egg",
+    settings -> new ModSpawnEggItem(ModEntityTypes.DARK_GOLEM, settings),
+    new Item.Settings());
+```
+
+Required resources:
+
+```
+assets/MODID/items/<name>_spawn_egg.json
+assets/MODID/models/item/<name>_spawn_egg.json  ← parent: minecraft:item/template_spawn_egg
+lang item.MODID.<name>_spawn_egg
+creative tab entry
+```
+
+**Verification:** `gradlew build` is not enough for spawn eggs. Always run `gradlew runClient` at least until the title screen after adding or changing a custom spawn egg.
+
 ## Common Mistakes
 
 | Symptom | Cause | Fix |
@@ -222,6 +277,8 @@ Group constants: `ItemGroups.INGREDIENTS`, `BUILDING_BLOCKS`, `FOOD_AND_DRINK`, 
 | `ToolMaterial` needs interface | 1.21 ToolMaterial is a Record | Construct directly with `new ToolMaterial(...)` |
 | Recipe JSON parse error | Using `{"item":"..."}` format in 1.21.2+ | Use plain string values |
 | `Identifier.of does not exist` | Mojang mapping uses `ResourceLocation` | Yarn: `Identifier.of(ns,path)`, Mojang: `ResourceLocation.fromNamespaceAndPath()` |
+| Custom spawn egg crashes at startup | `SpawnEggItem.forEntity(customEntity)` returned `null` | Use `ModSpawnEggItem` subclass |
+| Build passes but game crashes | Runtime-only registry/resource issue | Run `gradlew runClient` after entities, renderers, spawn eggs, or resources |
 
 ## GearFactory Integration
 

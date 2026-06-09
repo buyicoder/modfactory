@@ -77,9 +77,9 @@ EntityRendererRegistry.register(MyEntityType, MyRenderer::new);
 ```java
 // Constructor takes ONLY Settings, NOT EntityType
 new SpawnEggItem(new Item.Settings())
-// Entity type is encoded in item NBT, not constructor
-// Use SpawnEggItem.forEntity(entityType) as factory
-// ⚠️ May crash in static initializer — test carefully
+// SpawnEggItem.forEntity(entityType) only works for existing vanilla egg mappings.
+// For custom entities, it can return null and crash during static registration.
+// Use a ModSpawnEggItem subclass that overrides getEntityType(ItemStack).
 ```
 
 ### Source Set Separation
@@ -145,7 +145,7 @@ public class RubyGolemEntity extends HostileEntity {
 
 ```java
 // client/model/<Name>EntityModel.java
-public class ThunderGolemEntityModel extends EntityModel<ThunderGolemEntity> {
+public class ThunderGolemEntityModel extends EntityModel<LivingEntityRenderState> {
     private final ModelPart head;
     private final ModelPart body;
     private final ModelPart rightArm;
@@ -182,24 +182,18 @@ public class ThunderGolemEntityModel extends EntityModel<ThunderGolemEntity> {
     }
 
     @Override
-    public void setAngles(ThunderGolemEntity entity, float limbAngle, float limbDistance,
-            float animationProgress, float headYaw, float headPitch) {
-        this.head.yaw = headYaw * 0.017453292F;
-        this.head.pitch = headPitch * 0.017453292F;
-        this.rightLeg.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
-        this.leftLeg.pitch = MathHelper.cos(limbAngle * 0.6662F + 3.1415927F) * 1.4F * limbDistance;
-        this.rightArm.pitch = MathHelper.cos(limbAngle * 0.6662F + 3.1415927F) * 1.4F * limbDistance;
-        this.leftArm.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
-    }
-
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-        head.render(matrices, vertices, light, overlay, color);
-        body.render(matrices, vertices, light, overlay, color);
-        rightArm.render(matrices, vertices, light, overlay, color);
-        leftArm.render(matrices, vertices, light, overlay, color);
-        rightLeg.render(matrices, vertices, light, overlay, color);
-        leftLeg.render(matrices, vertices, light, overlay, color);
+    public void setAngles(LivingEntityRenderState state) {
+        super.setAngles(state);
+        this.head.yaw = state.relativeHeadYaw * 0.017453292F;
+        this.head.pitch = state.pitch * 0.017453292F;
+        this.rightLeg.pitch = MathHelper.cos(state.limbSwingAnimationProgress * 0.6662F)
+            * 1.4F * state.limbSwingAmplitude;
+        this.leftLeg.pitch = MathHelper.cos(state.limbSwingAnimationProgress * 0.6662F + 3.1415927F)
+            * 1.4F * state.limbSwingAmplitude;
+        this.rightArm.pitch = MathHelper.cos(state.limbSwingAnimationProgress * 0.6662F + 3.1415927F)
+            * 1.4F * state.limbSwingAmplitude;
+        this.leftArm.pitch = MathHelper.cos(state.limbSwingAnimationProgress * 0.6662F)
+            * 1.4F * state.limbSwingAmplitude;
     }
 }
 ```
@@ -211,12 +205,7 @@ Key dimensions reference:
 - `.mirrored()` — mirror for left/right symmetry
 
 **IMPORTANT:** Entity model code requires imports:
-```java
-import net.minecraft.client.model.*;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
-```
+`render()` is final in 1.21.11. Do not override it. Keep model/renderer code in `src/client/java`.
 
 ### Entity Renderer
 
@@ -304,6 +293,15 @@ FabricDefaultBiomeModifications.addSpawn(
 | Loot table JSON | Optional | `data/MODID/loot_table/entities/<name>.json` |
 | Entity texture PNG | Yes | `textures/entity/<name>.png` |
 | Spawn egg texture | Optional | `textures/item/<name>_spawn_egg.png` |
+
+## Runtime Verification Gate
+
+After entity, renderer, model layer, spawn egg, or loot/resource changes:
+
+1. Run `gradlew build`.
+2. Run `gradlew runClient`.
+3. Read the client output until either title screen loads or a crash appears.
+4. If `runClient` crashes during `onInitialize`, treat it as a generation failure even if `build` passed.
 
 ## Common AI Goals (Reference)
 

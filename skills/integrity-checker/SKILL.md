@@ -18,10 +18,13 @@ Scans the entire project and cross-validates that every registered item/block/en
    - Every registered item has: texture + model + recipe + creative tab
    - Every registered block has: Texture + model + blockstate + BlockItem
    - Every armor item has: Equipment JSON + 2 texture layers
+   - Every spawn egg has: custom entity binding + item mapping + model + lang + creative tab
+   - Every entity has: renderer + model layer + texture + lang + loot table (or explicit no-drop note)
    - Every tool has: Appropriate tag
    - Every Mixin class has: Entry in mixins.json
    - Every command has: register() call
 4. Output: PASS list + FAIL list with fix instructions
+5. For runtime-sensitive changes, require `runClient` verification after build
 ```
 
 ## Run
@@ -106,6 +109,28 @@ REGISTERED item/block/entity → MUST have keys in:
   lang/en_us.json ("item.MODID.<name>", "block.MODID.<name>")
 ```
 
+### Rule 11: Entity Runtime Closure
+```
+REGISTERED EntityType → MUST have:
+  client renderer registration
+  model layer registration
+  textures/entity/<name>.png
+  lang/en_us.json key: "entity.MODID.<name>"
+  data/MODID/loot_table/entities/<name>.json
+```
+
+### Rule 12: Custom Spawn Egg Runtime Closure
+```
+REGISTERED spawn egg → MUST have:
+  custom SpawnEggItem subclass for custom entities (1.21.11)
+  assets/MODID/items/<name>_spawn_egg.json
+  assets/MODID/models/item/<name>_spawn_egg.json
+  lang item.MODID.<name>_spawn_egg
+  creative tab entry
+```
+
+Never consider spawn eggs verified by `gradlew build` alone. They can compile and still crash in `runClient` during static registration.
+
 ## Output Format
 
 ```
@@ -143,4 +168,5 @@ integrity-checker scans project      ← runs first
     └── Some FAIL → auto-fix generates missing files
         → integrity-checker re-runs
         → All PASS → proceed to build
+            → runtime-sensitive change? runClient gate
 ```

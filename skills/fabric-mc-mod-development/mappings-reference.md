@@ -104,6 +104,7 @@ Complete API name mapping table for Minecraft 1.21.x.
 | `KNOCKBACK_RESISTANCE` | `GENERIC_KNOCKBACK_RESISTANCE` |  |
 | `EntityType.Builder.build(RegistryKey)` | Same | Takes key, not string |
 | `SpawnEggItem(Settings)` | `SpawnEggItem(EntityType, Settings)` | EntityType removed from ctor |
-| `SpawnEggItem.forEntity(type)` | Same | Static factory for spawn eggs |
+| `SpawnEggItem.forEntity(type)` | Same | Vanilla egg lookup only; custom entity can return null |
+| `ModSpawnEggItem extends SpawnEggItem` | Custom implementation | Required for custom spawn eggs in Yarn 1.21.11 |
 | `enchanted_count_increase` + `"enchantment":"minecraft:looting"` | Same | Was `looting_enchant` |
 | `SpawnLocationTypes` | `SpawnLocationTypes` | May not exist in Yarn |
