@@ -1,0 +1,126 @@
+{
+  "name": "Farmer's Delight (Refabricated)",
+  "repo": "MehVahdJukaar/FarmersDelightRefabricated",
+  "branch": "fabric/1.21.1-3.0.0",
+  "mc_version": "1.21.1",
+  "loader": "fabric",
+  "mappings": "mojang (official)",
+  "package": "vectorwing.farmersdelight",
+  "license": "MIT",
+  "description": "Agriculture and cooking expansion mod. Adds cooking pot, cutting board, stove, skillet, and 100+ food items.",
+  "architecture": {
+    "pattern": "feature-based with centralized registry",
+    "root_package": "vectorwing.farmersdelight",
+    "packages": {
+      "common": "Shared logic (blocks, items, entities, events, mixins, network, registry)",
+      "common/block": "Custom blocks + block entity classes",
+      "common/block/entity": "BlockEntity implementations (CookingPot, CuttingBoard, Skillet, Basket, Cabinet, Stove)",
+      "common/item": "Custom item classes (KnifeItem, DrinkableItem, ConsumableItem, DogFoodItem)",
+      "common/registry": "24 centralized registry classes (ModBlocks, ModItems, ModEffects, ModRecipeTypes, etc.)",
+      "common/mixin": "Mixin injections into vanilla classes",
+      "common/network": "Custom network packet handling",
+      "common/event": "Event handlers",
+      "common/utility": "Utility/helper classes",
+      "common/crafting": "Custom recipe types and serializers",
+      "common/world": "World generation features",
+      "client": "Client-only code (rendering, GUI, particles, models)",
+      "client/gui": "Screen implementations (CookingPotScreen, CuttingBoardScreen)",
+      "client/renderer": "Block entity renderers",
+      "data": "Data generators (BlockStates, ItemModels, BlockTags, Recipes)",
+      "integration": "JEI/REI/EMI/CraftTweaker/ModMenu compatibility"
+    }
+  },
+  "registration": {
+    "strategy": "centralized registry + Supplier-based lazy init",
+    "registry_count": 24,
+    "key_classes": [
+      "ModItems.java",
+      "ModBlocks.java",
+      "ModBlockEntityTypes.java",
+      "ModEffects.java",
+      "ModEntityTypes.java",
+      "ModRecipeTypes.java",
+      "ModRecipeSerializers.java",
+      "ModMenuTypes.java",
+      "ModCreativeTabs.java",
+      "ModSounds.java",
+      "ModParticleTypes.java",
+      "ModDamageTypes.java",
+      "ModDataComponents.java",
+      "ModAdvancements.java",
+      "ModBiomeFeatures.java",
+      "ModBiomeModifiers.java",
+      "ModChestLootTables.java",
+      "ModIngredientTypes.java",
+      "ModLootFunctions.java",
+      "ModLootModifiers.java",
+      "ModMaterials.java",
+      "ModPlacementModifiers.java",
+      "ModAtlases.java",
+      "RegistryAliases.java"
+    ],
+    "pattern": "Each ModXxx class is a static registry holder. ModItems uses a Supplier-based pattern with registerWithTab() for creative tab auto-add. Uses Mojang official mappings (Item.Properties, net.minecraft.world.item.*)"
+  },
+  "key_systems": [
+    {
+      "name": "Cooking Pot",
+      "type": "BlockEntity + Menu + Screen",
+      "files": [
+        "common/block/CookingPotBlock.java",
+        "common/block/entity/CookingPotBlockEntity.java",
+        "client/gui/CookingPotScreen.java",
+        "common/crafting/CookingPotRecipe.java"
+      ],
+      "pattern": "Custom recipe type + progress-based cooking + GUI with slots"
+    },
+    {
+      "name": "Cutting Board",
+      "type": "BlockEntity + Interaction",
+      "files": [
+        "common/block/CuttingBoardBlock.java",
+        "common/block/entity/CuttingBoardBlockEntity.java",
+        "client/renderer/CuttingBoardRenderer.java"
+      ],
+      "pattern": "Tool-interactable block + placed item rendering + recipe lookup"
+    },
+    {
+      "name": "Knife",
+      "type": "Custom Tool Item",
+      "files": ["common/item/KnifeItem.java"],
+      "pattern": "Extends Item, overrides useOnBlock for cutting board interaction, custom damage behavior"
+    },
+    {
+      "name": "Skillet",
+      "type": "BlockEntity + cooking",
+      "files": [
+        "common/block/SkilletBlock.java",
+        "common/block/entity/SkilletBlockEntity.java"
+      ],
+      "pattern": "Item-holding block + cooking progress + model rendering"
+    },
+    {
+      "name": "Food System",
+      "type": "FoodValues + Effects",
+      "files": [
+        "common/FoodValues.java",
+        "common/effect/ComfortEffect.java",
+        "common/effect/NourishmentEffect.java"
+      ],
+      "pattern": "Centralized food value definitions + custom status effects"
+    }
+  ],
+  "mixins": {
+    "location": "common/mixin/",
+    "examples": [
+      "Mixin for cake block behavior",
+      "Mixin for soup item consumption",
+      "Mixin for farmland trampling prevention"
+    ]
+  },
+  "extracted_templates": [
+    "centralized_registry/",
+    "block_entity_with_gui/",
+    "custom_recipe_type/",
+    "tool_with_interaction/"
+  ]
+}
