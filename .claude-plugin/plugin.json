@@ -1,6 +1,6 @@
 {
   "name": "modsmith",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "ModSmith v2.0 - Modular Minecraft mod development agent for Claude Code. Closed-loop build→fix→rebuild pipeline. 8 skills covering texture/ item/block/entity/gameplay generation plus auto-fix repair.",
   "author": "buyicoder",
   "license": "MIT",
@@ -15,7 +15,10 @@
       "skills/entity-generator/SKILL.md",
       "skills/gameplay-generator/SKILL.md",
       "skills/auto-fix/SKILL.md",
-      "skills/mod-analyzer/SKILL.md"
+      "skills/mod-analyzer/SKILL.md",
+      "skills/recipe-generator/SKILL.md",
+      "skills/worldgen-generator/SKILL.md",
+      "skills/mixin-generator/SKILL.md"
     ],
     "mcp": {
       "config": "mcp/mcp-servers.json"
