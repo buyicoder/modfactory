@@ -55,27 +55,121 @@ public class RubyGolemEntity extends HostileEntity {
 }
 ```
 
-### Entity Model + Renderer
+### Entity Model (with actual ModelPart code)
 
 ```java
 // client/model/<Name>EntityModel.java
-public class RubyGolemEntityModel extends EntityModel<RubyGolemEntity> {
+public class ThunderGolemEntityModel extends EntityModel<ThunderGolemEntity> {
+    private final ModelPart head;
     private final ModelPart body;
-    // ... standard model parts and animation
-}
+    private final ModelPart rightArm;
+    private final ModelPart leftArm;
+    private final ModelPart rightLeg;
+    private final ModelPart leftLeg;
 
-// client/renderer/<Name>EntityRenderer.java
-public class RubyGolemEntityRenderer extends MobEntityRenderer<RubyGolemEntity, RubyGolemEntityModel> {
-    public RubyGolemEntityRenderer(EntityRendererFactory.Context ctx) {
-        super(ctx, new RubyGolemEntityModel(ctx.getPart(ModModelLayers.RUBY_GOLEM)), 0.5F);
+    public ThunderGolemEntityModel(ModelPart root) {
+        super(root);
+        this.head = root.getChild("head");
+        this.body = root.getChild("body");
+        this.rightArm = root.getChild("right_arm");
+        this.leftArm = root.getChild("left_arm");
+        this.rightLeg = root.getChild("right_leg");
+        this.leftLeg = root.getChild("left_leg");
+    }
+
+    public static TexturedModelData getTexturedModelData() {
+        ModelData modelData = new ModelData();
+        ModelPartData root = modelData.getRoot();
+        root.addChild("head", ModelPartBuilder.create()
+            .uv(0, 0).cuboid(-4.0F, -8.0F, -4.0F, 8, 8, 8), ModelTransform.pivot(0, 0, 0));
+        root.addChild("body", ModelPartBuilder.create()
+            .uv(0, 16).cuboid(-6.0F, 0.0F, -3.0F, 12, 10, 6), ModelTransform.pivot(0, 0, 0));
+        root.addChild("right_arm", ModelPartBuilder.create()
+            .uv(40, 16).cuboid(-3.0F, -2.0F, -2.0F, 4, 12, 4), ModelTransform.pivot(-8, 2, 0));
+        root.addChild("left_arm", ModelPartBuilder.create()
+            .uv(40, 16).mirrored().cuboid(-1.0F, -2.0F, -2.0F, 4, 12, 4), ModelTransform.pivot(8, 2, 0));
+        root.addChild("right_leg", ModelPartBuilder.create()
+            .uv(0, 32).cuboid(-2.0F, 0.0F, -2.0F, 4, 10, 4), ModelTransform.pivot(-3, 14, 0));
+        root.addChild("left_leg", ModelPartBuilder.create()
+            .uv(0, 32).mirrored().cuboid(-2.0F, 0.0F, -2.0F, 4, 10, 4), ModelTransform.pivot(3, 14, 0));
+        return TexturedModelData.of(modelData, 64, 64);
     }
 
     @Override
-    public Identifier getTexture(RubyGolemEntity entity) {
-        return Identifier.of(ExampleMod.MOD_ID, "textures/entity/ruby_golem.png");
+    public void setAngles(ThunderGolemEntity entity, float limbAngle, float limbDistance,
+            float animationProgress, float headYaw, float headPitch) {
+        this.head.yaw = headYaw * 0.017453292F;
+        this.head.pitch = headPitch * 0.017453292F;
+        this.rightLeg.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
+        this.leftLeg.pitch = MathHelper.cos(limbAngle * 0.6662F + 3.1415927F) * 1.4F * limbDistance;
+        this.rightArm.pitch = MathHelper.cos(limbAngle * 0.6662F + 3.1415927F) * 1.4F * limbDistance;
+        this.leftArm.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
+    }
+
+    @Override
+    public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+        head.render(matrices, vertices, light, overlay, color);
+        body.render(matrices, vertices, light, overlay, color);
+        rightArm.render(matrices, vertices, light, overlay, color);
+        leftArm.render(matrices, vertices, light, overlay, color);
+        rightLeg.render(matrices, vertices, light, overlay, color);
+        leftLeg.render(matrices, vertices, light, overlay, color);
     }
 }
 ```
+
+Key dimensions reference:
+- `cuboid(xOffset, yOffset, zOffset, width, height, depth)` — width/height/depth in pixels
+- `uv(u, v)` — texture UV start coordinate on 64×64 entity texture
+- `ModelTransform.pivot(x, y, z)` — rotation pivot point
+- `.mirrored()` — mirror for left/right symmetry
+
+**IMPORTANT:** Entity model code requires imports:
+```java
+import net.minecraft.client.model.*;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
+```
+
+### Entity Renderer
+
+```java
+// client/renderer/<Name>EntityRenderer.java
+public class ThunderGolemEntityRenderer extends MobEntityRenderer<ThunderGolemEntity, ThunderGolemEntityModel> {
+    private static final Identifier TEXTURE =
+        Identifier.of(ExampleMod.MOD_ID, "textures/entity/thunder_golem.png");
+
+    public ThunderGolemEntityRenderer(EntityRendererFactory.Context ctx) {
+        super(ctx, new ThunderGolemEntityModel(ctx.getPart(ModModelLayers.THUNDER_GOLEM)), 0.6F);
+    }
+
+    @Override
+    public Identifier getTexture(ThunderGolemEntity entity) {
+        return TEXTURE;
+    }
+}
+```
+
+### ModelLayer Registration
+
+```java
+// client/<ModName>Client.java
+public static final EntityModelLayer THUNDER_GOLEM =
+    new EntityModelLayer(Identifier.of(MOD_ID, "thunder_golem"), "main");
+
+@Override
+public void onInitializeClient() {
+    EntityRendererRegistry.register(ModEntityTypes.THUNDER_GOLEM,
+        ThunderGolemEntityRenderer::new);
+    EntityModelLayerRegistry.registerModelLayer(THUNDER_GOLEM,
+        ThunderGolemEntityModel::getTexturedModelData);
+}
+```
+
+### Entity Texture
+
+Entity textures are 64×64 PNG with UV layout matching the model's `.uv()` calls. Generate via `appearance-designer` → "golem" category → recommend stone/metal body with colored cracks. Use `texture-ai-generator` for complex entity textures.
 
 ### Registration
 
