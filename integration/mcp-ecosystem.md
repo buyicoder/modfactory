@@ -92,13 +92,15 @@ if (mcdevMCP_available()) {
 
 ## Blockbench MCP (3D Modeling + Texturing)
 
-**Status:** Configured — Blockbench needs manual install (admin required)
+**Status:** ✅ Connected — Blockbench MCP active on localhost:3000
 
-**Setup:**
-1. Install Blockbench: `winget install JannisX11.Blockbench` (requires admin)
-2. Install blockbench-mcp plugin in Blockbench
-3. Start `node apps/mcp-server/dist/index.js`
+**Setup (completed):**
+1. Blockbench installed: `~/AppData/Local/Programs/Blockbench/`
+2. Plugin: `jasonjgardner/blockbench-mcp-plugin` loaded → `D:/MC/blockbench-mcp-plugin/dist/mcp.js`
+3. MCP endpoint: `http://localhost:3000/bb-mcp`
+4. Claude Code connected: `claude mcp add blockbench --transport http http://localhost:3000/bb-mcp`
 
-**Tools (50+):** Model creation (cubes, spheres, extrude), Texture painting (brushes, fill, layers), UV mapping, Animation, Screenshot preview
+**Available MCP tools:** model creation/edit, texture manipulation, UV mapping, animation, screenshot
+**11 built-in prompts:** bedrock_block, hytale_model_creation, java_block, model_creation_geometry, etc.
 
-**Integration:** Used by `entity-designer` for professional entity model generation
+**Integration:** Used by `entity-designer` for professional entity model generation. Claude can now directly create/edit Blockbench models.
