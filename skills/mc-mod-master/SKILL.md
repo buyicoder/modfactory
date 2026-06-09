@@ -194,9 +194,29 @@ After generating all code and resources, ModSmith runs the build→fix→rebuild
    (max 5 iterations, then escalate to user)
 ```
 
+## Task Completeness Check (CRITICAL — before build)
+
+**BEFORE proceeding to build, verify EVERY user-requested feature has generated files:**
+
+```
+User asked for: [list explicitly]
+Generated:      [count generated files per feature]
+⚠️  Missing:     [features with 0 generated files]
+```
+
+**If any feature has ZERO files → STOP. Return to generation step.**
+**Do NOT proceed to integrity-check or build until all features covered.**
+
+Example:
+```
+User: "thunder ore with worldgen"
+Generated: items(2) blocks(1) recipes(2) worldgen(0) ← RED FLAG
+→ worldgen missing! Go back to worldgen-generator.
+```
+
 ## Output Checklist
 
-After all sub-skills complete, verify:
+After all sub-skills AND task completeness check pass, verify:
 - [ ] All Java files compile-ready with correct imports
 - [ ] All JSON files valid (models, recipes, blockstates, equipment)
 - [ ] All PNG textures exist at correct paths
