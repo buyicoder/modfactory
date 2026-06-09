@@ -89,3 +89,16 @@ if (mcdevMCP_available()) {
     generateMixinWithKnownSignature("damage(ServerWorld, DamageSource, float)");
 }
 ```
+
+## Blockbench MCP (3D Modeling + Texturing)
+
+**Status:** Configured — Blockbench needs manual install (admin required)
+
+**Setup:**
+1. Install Blockbench: `winget install JannisX11.Blockbench` (requires admin)
+2. Install blockbench-mcp plugin in Blockbench
+3. Start `node apps/mcp-server/dist/index.js`
+
+**Tools (50+):** Model creation (cubes, spheres, extrude), Texture painting (brushes, fill, layers), UV mapping, Animation, Screenshot preview
+
+**Integration:** Used by `entity-designer` for professional entity model generation

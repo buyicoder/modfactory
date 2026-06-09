@@ -113,19 +113,50 @@ entity-designer ← RUNS FIRST
     └── User approves
     │
     ▼
-entity-generator ← RECEIVES COMPLETE BLUEPRINT
+blockbench-mcp ← MODEL + TEXTURE GENERATION (if available)
     │
-    ├── Knows model shape → generates correct ModelPart code
-    ├── Knows texture palette → calls texture-generator
-    ├── Knows sounds → generates ModSounds + sound JSONs
-    ├── Knows spawn method → generates spawn egg or structure
-    └── Knows drops → generates loot table
+    ├── Create 3D model from blueprint specs
+    ├── Apply texture palette
+    ├── Capture preview screenshot → show user
+    └── Export EntityModel Java code
+    │
+    ▼
+entity-generator ← RECEIVES COMPLETE BLUEPRINT + EXPORTED CODE
+    │
+    ├── Model code → from blockbench-mcp export
+    ├── Texture → from blockbench-mcp or GearFactory
+    ├── Sounds → ModSounds + sound JSONs
+    ├── Spawn method → spawn egg or structure
+    └── Drops → loot table
     │
     ▼
 integrity-checker ← VERIFIES COMPLETENESS
     │
     └── Checks: All blueprint items have corresponding files
 ```
+
+### Blockbench MCP Setup
+
+```bash
+# 1. Install Blockbench
+winget install JannisX11.Blockbench
+
+# 2. Setup blockbench-mcp
+cd D:/MC/blockbench-mcp
+pnpm install
+pnpm build
+
+# 3. In Blockbench: File > Plugins > Load Plugin from URL
+#    Use: D:/MC/blockbench-mcp/apps/mcp-plugin
+
+# 4. Start MCP server
+node apps/mcp-server/dist/index.js
+```
+
+**When Blockbench is NOT available** (offline/headless mode):
+- entity-designer falls back to GearFactory for textures
+- entity-generator generates ModelPart code from blueprints
+- User manually creates the model in Blockbench later
 
 ## Real Example: Thunder Golem Retrospective
 
