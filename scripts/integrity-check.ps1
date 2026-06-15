@@ -7,6 +7,11 @@ $errors = @()
 $warnings = @()
 $passes = @()
 
+$entityContractLib = Join-Path $PSScriptRoot "lib\EntityContract.ps1"
+if (Test-Path $entityContractLib) {
+    . $entityContractLib
+}
+
 # ============================================================
 # Scanning functions
 # ============================================================
@@ -33,11 +38,72 @@ function Find-RegisteredItems {
             if ($line -match "EquipmentType\.") { $type = "armor" }
             elseif ($line -match "\.sword\(|\.pickaxe\(|AxeItem|ShovelItem|HoeItem") { $type = "tool" }
             elseif ($line -match "FoodComponent|\.food\(") { $type = "food" }
+            elseif ($name -match "_spawn_egg$" -or $line -match "SpawnEggItem|ModSpawnEggItem") { $type = "spawn_egg" }
             elseif ($line -match "LightningRubyItem|extends Item") { $type = "special" }
             $items += @{ name = $name; type = $type }
         }
     }
-    return $items
+    return @($items)
+}
+
+function Find-ModIds {
+    $ids = @()
+    $resources = Join-Path $ProjectDir "src/main/resources/assets"
+    if (Test-Path $resources) {
+        Get-ChildItem -Path $resources -Directory -ErrorAction SilentlyContinue |
+            ForEach-Object { $ids += $_.Name }
+    }
+    if ($ids.Count -eq 0) {
+        $ids += "modid"
+    }
+    return @($ids | Select-Object -Unique)
+}
+
+function Find-RegisteredEntities {
+    $entities = @()
+    $files = Get-ChildItem -Path $ProjectDir -Recurse -Filter "ModEntityTypes.java" -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch "\\build\\" }
+    foreach ($f in $files) {
+        $content = Get-Content $f.FullName -Raw
+        $fieldMatches = [regex]::Matches($content, 'public\s+static\s+final\s+EntityType<[^>]+>\s+([A-Z0-9_]+)')
+        foreach ($m in $fieldMatches) {
+            $field = $m.Groups[1].Value
+            $path = ($field.ToLowerInvariant())
+            $windowStart = [Math]::Max(0, $m.Index - 250)
+            $windowLength = [Math]::Min($content.Length - $windowStart, 1000)
+            $window = $content.Substring($windowStart, $windowLength)
+            $pathMatch = [regex]::Match($window, 'Identifier\.of\([^,]+,\s*"([^"]+)"\)|register\("([^"]+)"')
+            if ($pathMatch.Success) {
+                if ($pathMatch.Groups[1].Value) {
+                    $path = $pathMatch.Groups[1].Value
+                } elseif ($pathMatch.Groups[2].Value) {
+                    $path = $pathMatch.Groups[2].Value
+                }
+            }
+            $entities += @{ field = $field; path = $path; file = $f.FullName }
+        }
+    }
+    return @($entities)
+}
+
+function Get-EntityContractIndex {
+    $index = @{}
+    $contracts = Get-ChildItem -Path $ProjectDir -Recurse -Filter "*.contract.json" -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch "\\build\\" }
+    foreach ($contractFile in $contracts) {
+        try {
+            $contract = Read-EntityContract -Path $contractFile.FullName
+            if ($contract.entityId) {
+                $index[$contract.entityId] = $contractFile.FullName
+            }
+            if ($contract.runtime.spawnEgg) {
+                $index[$contract.runtime.spawnEgg] = $contractFile.FullName
+            }
+        } catch {
+            $script:errors += "ENTITY_CONTRACT_UNREADABLE: $($contractFile.FullName) ($($_.Exception.Message))"
+        }
+    }
+    return $index
 }
 
 function Find-RegisteredBlocks {
@@ -51,7 +117,7 @@ function Find-RegisteredBlocks {
             $blocks += @{ name = $m.Groups[1].Value }
         }
     }
-    return $blocks
+    return @($blocks)
 }
 
 function Find-MixinClasses {
@@ -65,7 +131,7 @@ function Find-MixinClasses {
             $mixins += @{ name = $className; file = $f.FullName }
         }
     }
-    return $mixins
+    return @($mixins)
 }
 
 function Test-FileExists($relativePath) {
@@ -92,6 +158,27 @@ function Check-Item($item) {
     $id = $item.name
     $type = $item.type
     $prefix = if ($type -eq "armor" -or $type -eq "tool") { "ruby_" } else { "" }
+
+    if ($type -eq "spawn_egg") {
+        $modIds = Find-ModIds
+        $hasItemMapping = $false
+        $hasModel = $false
+        foreach ($modId in $modIds) {
+            if (Test-FileExists "assets/$modId/items/${id}.json") { $hasItemMapping = $true }
+            if (Test-FileExists "assets/$modId/models/item/${id}.json") { $hasModel = $true }
+        }
+        if ($hasItemMapping) {
+            $script:passes += "spawn_egg_item_mapping: $id"
+        } else {
+            $script:errors += "MISSING_SPAWN_EGG_ITEM_MAPPING: assets/<modid>/items/${id}.json"
+        }
+        if ($hasModel) {
+            $script:passes += "spawn_egg_model: $id"
+        } else {
+            $script:errors += "MISSING_SPAWN_EGG_MODEL: assets/<modid>/models/item/${id}.json"
+        }
+        return
+    }
 
     # Rule 1: Texture
     if (Test-FileExists "assets/modid/textures/item/${id}.png") {
@@ -268,6 +355,42 @@ function Check-EntityContracts {
     }
 }
 
+function Check-RegisteredEntityClosure {
+    $contracts = Get-EntityContractIndex
+    $modIds = Find-ModIds
+    $entities = Find-RegisteredEntities
+    foreach ($entity in $entities) {
+        $foundContract = $false
+        foreach ($modId in $modIds) {
+            $entityId = "${modId}:$($entity.path)"
+            if ($contracts.ContainsKey($entityId)) {
+                $foundContract = $true
+                $script:passes += "entity-contract-present: $entityId"
+                break
+            }
+        }
+        if (-not $foundContract) {
+            $script:errors += "MISSING_ENTITY_CONTRACT: $($entity.field) ($($entity.path))"
+        }
+    }
+
+    $spawnEggs = @(Find-RegisteredItems) | Where-Object { $_.type -eq "spawn_egg" }
+    foreach ($egg in $spawnEggs) {
+        $foundContract = $false
+        foreach ($modId in $modIds) {
+            $eggId = "${modId}:$($egg.name)"
+            if ($contracts.ContainsKey($eggId)) {
+                $foundContract = $true
+                $script:passes += "spawn-egg-contract-present: $eggId"
+                break
+            }
+        }
+        if (-not $foundContract) {
+            $script:errors += "MISSING_SPAWN_EGG_CONTRACT: $($egg.name)"
+        }
+    }
+}
+
 # ============================================================
 # Main
 # ============================================================
@@ -278,8 +401,8 @@ Write-Host " ModFactory Integrity Checker" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-$items = Find-RegisteredItems
-$blocks = Find-RegisteredBlocks
+$items = @(Find-RegisteredItems)
+$blocks = @(Find-RegisteredBlocks)
 
 Write-Host "Found: $($items.Count) items, $($blocks.Count) blocks"
 Write-Host ""
@@ -299,6 +422,9 @@ Check-Mixins
 
 # Check entity asset contracts
 Check-EntityContracts
+
+# Check registered entities and spawn eggs even without contracts
+Check-RegisteredEntityClosure
 
 # ============================================================
 # Report

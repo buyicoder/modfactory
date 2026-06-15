@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modfactory.local/schemas/contracts/qa.report.schema.json",
+  "title": "ModFactory QA Report",
+  "type": "object",
+  "required": ["schemaVersion", "targetId", "commands", "evidenceSummary", "manualFindings", "openRisks"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "targetId": { "type": "string" },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "exitCode", "summary"],
+        "properties": {
+          "command": { "type": "string" },
+          "exitCode": { "type": "integer" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "evidenceSummary": { "type": "string" },
+    "manualFindings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "openRisks": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

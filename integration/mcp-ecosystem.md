@@ -11,9 +11,10 @@ ModFactory v3.1 integrates with the following external MCP servers for enhanced 
 
 ## Install
 
+MCP configuration is runtime-specific. Use the equivalent MCP server configuration format for Cursor, Claude Code, Codex, OpenClaw, or any other adapter host. The examples below show one JSON-style configuration shape.
+
 ### mcdev-mcp (Source Code Access)
 ```json
-// .claude/settings.local.json
 {
   "mcpServers": {
     "minecraft-dev": {
@@ -94,13 +95,19 @@ if (mcdevMCP_available()) {
 
 **Status:** ✅ Connected — Blockbench MCP active on localhost:3000
 
-**Setup (completed):**
+**Setup:**
 1. Blockbench installed: `~/AppData/Local/Programs/Blockbench/`
 2. Plugin: `jasonjgardner/blockbench-mcp-plugin` loaded → `D:/MC/blockbench-mcp-plugin/dist/mcp.js`
 3. MCP endpoint: `http://localhost:3000/bb-mcp`
-4. Claude Code connected: `claude mcp add blockbench --transport http http://localhost:3000/bb-mcp`
+4. Adapter runtime connects an MCP server named `blockbench` to `http://localhost:3000/bb-mcp`
+
+Claude Code example:
+
+```bash
+claude mcp add blockbench --transport http http://localhost:3000/bb-mcp
+```
 
 **Available MCP tools:** model creation/edit, texture manipulation, UV mapping, animation, screenshot
 **11 built-in prompts:** bedrock_block, hytale_model_creation, java_block, model_creation_geometry, etc.
 
-**Integration:** Used by `entity-designer` for professional entity model generation. Claude can now directly create/edit Blockbench models.
+**Integration:** Used by entity production and asset service specialists for professional entity model generation. Any adapter with MCP access can directly create/edit Blockbench models.

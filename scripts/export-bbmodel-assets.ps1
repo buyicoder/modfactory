@@ -60,6 +60,9 @@ $contract = [ordered]@{
         spawnEgg = "$ModId`:${EntityName}_spawn_egg"
         bossBar = $false
     }
+    loot = [ordered]@{
+        noDrop = $true
+    }
     animations = $animations
 }
 

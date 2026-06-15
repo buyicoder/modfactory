@@ -9,6 +9,8 @@ description: Use when generating a complete mod to verify all files are consiste
 
 Scans the entire project and cross-validates that every registered item/block/entity/command has all its required companion files. Detects 14 types of "silent failures" that compile fine but break at runtime.
 
+In ModFactory architecture this skill is the QA module. Use `core/contracts.md` and `core/workflows/qa-gates.md` as the source of truth. It must validate closure and provenance, not just file existence. A texture can exist and still be wrong if the contract requires a vanilla-derived source and the output was novel-generated.
+
 ## How It Works
 
 ```
@@ -23,8 +25,12 @@ Scans the entire project and cross-validates that every registered item/block/en
    - Every tool has: Appropriate tag
    - Every Mixin class has: Entry in mixins.json
    - Every command has: register() call
-4. Output: PASS list + FAIL list with fix instructions
-5. For runtime-sensitive changes, require `runClient` verification after build
+4. Read contracts when present:
+   - Entity contracts validate entity runtime/resource closure.
+   - Asset contracts validate source provenance, dimensions, alpha, silhouette, and UV preservation policy.
+   - Animation contracts validate clip names, loop flags, and runtime triggers.
+5. Output: PASS list + FAIL list with fix instructions
+6. For runtime-sensitive changes, require `runClient` verification after build
 ```
 
 ## Run
@@ -109,19 +115,22 @@ REGISTERED item/block/entity → MUST have keys in:
   lang/en_us.json ("item.MODID.<name>", "block.MODID.<name>")
 ```
 
-### Rule 11: Entity Runtime Closure
+### Rule 11: Entity Runtime Closure (Hard Failure)
 ```
 REGISTERED EntityType → MUST have:
-  client renderer registration
-  model layer registration
-  textures/entity/<name>.png
+  matching entity asset contract
+  renderer containing the contract texture identifier
+  model declaring TexturedModelData.of(data, width, height)
+  textures/entity/<name>.png with contract dimensions
   lang/en_us.json key: "entity.MODID.<name>"
-  data/MODID/loot_table/entities/<name>.json
+  data/MODID/loot_table/entities/<name>.json OR contract loot.noDrop=true
+  runtime entityTypeField and dimensions in registry code
 ```
 
-### Rule 12: Custom Spawn Egg Runtime Closure
+### Rule 12: Custom Spawn Egg Runtime Closure (Hard Failure)
 ```
 REGISTERED spawn egg → MUST have:
+  matching entity asset contract runtime.spawnEgg
   custom SpawnEggItem subclass for custom entities (1.21.11)
   assets/MODID/items/<name>_spawn_egg.json
   assets/MODID/models/item/<name>_spawn_egg.json
@@ -131,14 +140,39 @@ REGISTERED spawn egg → MUST have:
 
 Never consider spawn eggs verified by `gradlew build` alone. They can compile and still crash in `runClient` during static registration.
 
-### Rule 13: Entity Asset Contract
+### Rule 13: Entity Asset Contract (Hard Failure)
 ```
-REGISTERED complex entity SHOULD have:
+REGISTERED generated entity MUST have:
   models/<name>.contract.json
   texture dimensions matching contract.texture
   model TexturedModelData size matching contract.model
   renderer texture path matching contract.renderer
+  spawn egg, lang, loot, and runtime registry closure
 ```
+
+### Rule 14: Asset Provenance Contract (Hard Failure)
+```
+ASSET contract with requiresVanillaSource=true → MUST have:
+  source.type = vanilla_texture
+  source.id/path recorded
+  transform tool or transform type recorded
+  output texture exists
+  output dimensions match contract
+  preserveAlpha and preserveDimensions honored when true
+```
+
+If a spawn egg, ingot, nugget, tool, armor icon, or vanilla-shaped block has a close vanilla source, generated art is not enough unless the user explicitly requested a novel shape.
+
+### Rule 15: Animation Runtime Contract (Hard Failure)
+```
+ANIMATION contract one-shot clip → MUST have:
+  stable clip name
+  loop=false
+  runtime trigger
+  required runtime state when code-driven
+```
+
+For entity animations, Blockbench clips are not complete until Fabric Engineering wires the trigger through entity state/render state and runClient QA verifies behavior.
 
 ## Output Format
 
@@ -179,3 +213,14 @@ integrity-checker scans project      ← runs first
         → All PASS → proceed to build
             → runtime-sensitive change? runClient gate
 ```
+
+## QA Gate Stack
+
+Use the smallest gate that can catch the current class of error, then escalate:
+
+1. Contract shape: JSON has the required intent fields.
+2. Resource closure: registered code has matching resources.
+3. Provenance closure: assets came from the required source and transform route.
+4. Build closure: `gradlew build`.
+5. Runtime closure: `gradlew runClient` plus `scripts\qa-runclient-check.ps1`.
+6. Visual/behavior QA: in-game appearance, scale, spawn egg, animation triggers, boss bar, drops, and interactions.

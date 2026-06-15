@@ -133,10 +133,10 @@ public class RubyGolemEntity extends HostileEntity {
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return HostileEntity.createHostileAttributes()
-            .add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0D)
-            .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25D)
-            .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 6.0D)
-            .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 35.0D);
+            .add(EntityAttributes.MAX_HEALTH, 40.0D)
+            .add(EntityAttributes.MOVEMENT_SPEED, 0.25D)
+            .add(EntityAttributes.ATTACK_DAMAGE, 6.0D)
+            .add(EntityAttributes.FOLLOW_RANGE, 35.0D);
     }
 }
 ```
@@ -167,17 +167,17 @@ public class ThunderGolemEntityModel extends EntityModel<LivingEntityRenderState
         ModelData modelData = new ModelData();
         ModelPartData root = modelData.getRoot();
         root.addChild("head", ModelPartBuilder.create()
-            .uv(0, 0).cuboid(-4.0F, -8.0F, -4.0F, 8, 8, 8), ModelTransform.pivot(0, 0, 0));
+            .uv(0, 0).cuboid(-4.0F, -8.0F, -4.0F, 8, 8, 8), ModelTransform.origin(0, 0, 0));
         root.addChild("body", ModelPartBuilder.create()
-            .uv(0, 16).cuboid(-6.0F, 0.0F, -3.0F, 12, 10, 6), ModelTransform.pivot(0, 0, 0));
+            .uv(0, 16).cuboid(-6.0F, 0.0F, -3.0F, 12, 10, 6), ModelTransform.origin(0, 0, 0));
         root.addChild("right_arm", ModelPartBuilder.create()
-            .uv(40, 16).cuboid(-3.0F, -2.0F, -2.0F, 4, 12, 4), ModelTransform.pivot(-8, 2, 0));
+            .uv(40, 16).cuboid(-3.0F, -2.0F, -2.0F, 4, 12, 4), ModelTransform.origin(-8, 2, 0));
         root.addChild("left_arm", ModelPartBuilder.create()
-            .uv(40, 16).mirrored().cuboid(-1.0F, -2.0F, -2.0F, 4, 12, 4), ModelTransform.pivot(8, 2, 0));
+            .uv(40, 16).mirrored().cuboid(-1.0F, -2.0F, -2.0F, 4, 12, 4), ModelTransform.origin(8, 2, 0));
         root.addChild("right_leg", ModelPartBuilder.create()
-            .uv(0, 32).cuboid(-2.0F, 0.0F, -2.0F, 4, 10, 4), ModelTransform.pivot(-3, 14, 0));
+            .uv(0, 32).cuboid(-2.0F, 0.0F, -2.0F, 4, 10, 4), ModelTransform.origin(-3, 14, 0));
         root.addChild("left_leg", ModelPartBuilder.create()
-            .uv(0, 32).mirrored().cuboid(-2.0F, 0.0F, -2.0F, 4, 10, 4), ModelTransform.pivot(3, 14, 0));
+            .uv(0, 32).mirrored().cuboid(-2.0F, 0.0F, -2.0F, 4, 10, 4), ModelTransform.origin(3, 14, 0));
         return TexturedModelData.of(modelData, 64, 64);
     }
 
@@ -201,7 +201,7 @@ public class ThunderGolemEntityModel extends EntityModel<LivingEntityRenderState
 Key dimensions reference:
 - `cuboid(xOffset, yOffset, zOffset, width, height, depth)` — width/height/depth in pixels
 - `uv(u, v)` — texture UV start coordinate on 64×64 entity texture
-- `ModelTransform.pivot(x, y, z)` — rotation pivot point
+- `ModelTransform.origin(x, y, z)` — rotation origin point in Yarn 1.21.11
 - `.mirrored()` — mirror for left/right symmetry
 
 **IMPORTANT:** Entity model code requires imports:
@@ -211,7 +211,7 @@ Key dimensions reference:
 
 ```java
 // client/renderer/<Name>EntityRenderer.java
-public class ThunderGolemEntityRenderer extends MobEntityRenderer<ThunderGolemEntity, ThunderGolemEntityModel> {
+public class ThunderGolemEntityRenderer extends MobEntityRenderer<ThunderGolemEntity, LivingEntityRenderState, ThunderGolemEntityModel> {
     private static final Identifier TEXTURE =
         Identifier.of(ExampleMod.MOD_ID, "textures/entity/thunder_golem.png");
 
@@ -220,7 +220,12 @@ public class ThunderGolemEntityRenderer extends MobEntityRenderer<ThunderGolemEn
     }
 
     @Override
-    public Identifier getTexture(ThunderGolemEntity entity) {
+    public LivingEntityRenderState createRenderState() {
+        return new LivingEntityRenderState();
+    }
+
+    @Override
+    public Identifier getTexture(LivingEntityRenderState state) {
         return TEXTURE;
     }
 }
@@ -244,7 +249,7 @@ public void onInitializeClient() {
 
 ### Entity Texture
 
-Entity textures are 64×64 PNG with UV layout matching the model's `.uv()` calls. Generate via `appearance-designer` → "golem" category → recommend stone/metal body with colored cracks. Use `texture-ai-generator` for complex entity textures.
+Entity textures are UV sheets, not simple item icons. Use the entity asset contract first, export or generate a `.bbmodel`, then run `scripts/texture-variant-engine.ps1` for deterministic theme variants without changing dimensions or alpha. Do not route entity UV sheets through `texture-generator` or `texture-ai-generator` by default; those skills are for item/block/equipment textures unless explicitly used for manual concept art.
 
 ### Registration
 
@@ -292,16 +297,20 @@ FabricDefaultBiomeModifications.addSpawn(
 | Spawn rules | Optional | `common/event/EntitySpawnEvents.java` |
 | Loot table JSON | Optional | `data/MODID/loot_table/entities/<name>.json` |
 | Entity texture PNG | Yes | `textures/entity/<name>.png` |
-| Spawn egg texture | Optional | `textures/item/<name>_spawn_egg.png` |
+| Spawn egg item mapping | Yes if spawn egg exists | `assets/MODID/items/<name>_spawn_egg.json` |
+| Spawn egg item model | Yes if spawn egg exists | `assets/MODID/models/item/<name>_spawn_egg.json` |
+| Entity contract | Yes for generated entities | `models/<name>.contract.json` |
 
 ## Runtime Verification Gate
 
 After entity, renderer, model layer, spawn egg, or loot/resource changes:
 
-1. Run `gradlew build`.
-2. Run `gradlew runClient`.
-3. Read the client output until either title screen loads or a crash appears.
-4. If `runClient` crashes during `onInitialize`, treat it as a generation failure even if `build` passed.
+1. Run `scripts\validate-entity-assets.ps1 -ProjectDir . -ContractPath models\<name>.contract.json`.
+2. Run `scripts\integrity-check.ps1 -ProjectDir .`.
+3. Run `gradlew build`.
+4. Run `gradlew runClient`.
+5. Read the client output until either title screen loads or a crash appears.
+6. If `runClient` crashes during `onInitialize`, treat it as a generation failure even if `build` passed.
 
 ## Common AI Goals (Reference)
 
@@ -331,4 +340,8 @@ Entity classes go in the same package pattern as items/blocks:
 
 ## Entity Texture Generation
 
-Entity textures are special — they need UV-mapped model textures, not simple 16x16 icons. Use `texture-generator` for simple entity textures or recommend Blockbench for complex models.
+Entity textures are special: they need UV-mapped model textures, not simple 16x16 icons. Default to the contract/export/variant path:
+1. Export the reference `.bbmodel` and embedded texture with `scripts\export-bbmodel-assets.ps1`.
+2. Preserve texture width, height, alpha, and UV layout.
+3. Apply variants with `scripts\texture-variant-engine.ps1`.
+4. Validate with `scripts\validate-entity-assets.ps1`.

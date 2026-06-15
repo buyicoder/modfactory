@@ -9,6 +9,14 @@ description: Use when the user needs NEW item textures with novel shapes, AI-gen
 
 Generates novel Minecraft item textures using AI models. Complements GearFactory (which excels at recoloring existing shapes). Use when the user needs entirely NEW shapes that don't exist in vanilla Minecraft.
 
+In ModFactory architecture this skill is part of Texture Material, but only for `novel_generated` assets. Use `core/contracts.md` and `core/specialists/registry.md` as the source of truth for asset provenance. If a vanilla-equivalent shape exists, use Asset Source and `derive-vanilla-item-texture.ps1` instead.
+
+## Entity UV Sheet Boundary
+
+This skill is not the default route for entity UV textures. Entity sheets are model-specific atlases; changing shape, size, alpha, or UV placement can break renderer output even when the PNG looks good. For mobs and bosses, use `entity-design-expert` plus the entity asset contract, then apply themes through `scripts\texture-variant-engine.ps1`.
+
+Use AI generation for entity concept art only when the result will be manually adapted into the contract-backed UV sheet and revalidated with `scripts\validate-entity-assets.ps1`.
+
 **GearFactory vs Texture AI:**
 | Scenario | GearFactory | Texture AI |
 |----------|------------|------------|

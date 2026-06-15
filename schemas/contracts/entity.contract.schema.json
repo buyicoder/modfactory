@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modfactory.local/schemas/contracts/entity.contract.schema.json",
+  "title": "ModFactory Entity Contract",
+  "type": "object",
+  "required": ["schemaVersion", "entityId", "texture", "model", "renderer", "runtime", "animations"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "entityId": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$" },
+    "displayName": { "type": "string" },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string" },
+        "bbmodelPath": { "type": "string" }
+      }
+    },
+    "texture": {
+      "type": "object",
+      "required": ["path", "width", "height"],
+      "properties": {
+        "path": { "type": "string" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "source": { "type": "string" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["javaPath", "textureWidth", "textureHeight", "parts"],
+      "properties": {
+        "javaPath": { "type": "string" },
+        "textureWidth": { "type": "integer", "minimum": 1 },
+        "textureHeight": { "type": "integer", "minimum": 1 },
+        "parts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "renderer": {
+      "type": "object",
+      "required": ["javaPath", "textureIdentifier"],
+      "properties": {
+        "javaPath": { "type": "string" },
+        "textureIdentifier": { "type": "string" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["entityTypeField", "dimensions", "spawnEgg"],
+      "properties": {
+        "entityTypeField": { "type": "string" },
+        "dimensions": {
+          "type": "object",
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "number", "minimum": 0 },
+            "height": { "type": "number", "minimum": 0 }
+          }
+        },
+        "spawnEgg": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$" },
+        "bossBar": { "type": "boolean" }
+      }
+    },
+    "animations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

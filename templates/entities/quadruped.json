@@ -1,0 +1,14 @@
+{
+  "name": "quadruped",
+  "texture": { "width": 64, "height": 64 },
+  "dimensions": { "width": 0.9, "height": 1.4 },
+  "parts": [
+    { "name": "head", "from": [-4, 16, -10], "to": [4, 24, -2], "uv": [0, 0], "scale": "head" },
+    { "name": "body", "from": [-5, 10, -2], "to": [5, 20, 10], "uv": [18, 14], "scale": "body" },
+    { "name": "right_front_leg", "from": [-5, 0, -1], "to": [-2, 10, 2], "uv": [0, 24], "scale": "limb" },
+    { "name": "left_front_leg", "from": [2, 0, -1], "to": [5, 10, 2], "uv": [0, 37], "scale": "limb" },
+    { "name": "right_back_leg", "from": [-5, 0, 7], "to": [-2, 10, 10], "uv": [12, 24], "scale": "limb" },
+    { "name": "left_back_leg", "from": [2, 0, 7], "to": [5, 10, 10], "uv": [12, 37], "scale": "limb" }
+  ],
+  "animations": ["idle", "walk", "run", "attack", "hurt", "death"]
+}

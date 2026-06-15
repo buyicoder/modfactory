@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modfactory.local/schemas/contracts/asset.contract.schema.json",
+  "title": "ModFactory Asset Contract",
+  "type": "object",
+  "required": ["schemaVersion", "assetId", "assetType", "source", "transform", "output"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "assetId": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$" },
+    "assetType": {
+      "type": "string",
+      "enum": ["item_texture", "block_texture", "entity_texture", "equipment_texture", "model", "animation"]
+    },
+    "source": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["vanilla_texture", "project_asset", "bbmodel_embedded", "user_provided", "novel_generated", "mod_asset"]
+        },
+        "id": { "type": "string" },
+        "path": { "type": "string" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "required": ["type", "tool"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["palette_remap", "uv_safe_retheme", "shape_variant", "manual_edit", "none"]
+        },
+        "tool": { "type": "string" },
+        "parameters": { "type": "object" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": ["path", "width", "height", "preserveAlpha", "preserveDimensions"],
+      "properties": {
+        "path": { "type": "string" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "preserveAlpha": { "type": "boolean" },
+        "preserveDimensions": { "type": "boolean" },
+        "preserveSilhouette": { "type": "boolean" },
+        "preserveUvLayout": { "type": "boolean" }
+      }
+    }
+  }
+}

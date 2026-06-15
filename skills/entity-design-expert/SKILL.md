@@ -1,15 +1,17 @@
 ---
 name: entity-design-expert
-description: Use when creating a polished custom Minecraft mob, boss, pet, or creature that needs official reference assets, Blockbench model work, themed retexturing, animation clips, Fabric code generation, spawn egg, loot, boss bar, or runtime verification.
+description: Use when designing a polished custom Minecraft mob, boss, pet, or creature and coordinating its entity contract, mechanics, asset requirements, animation states, Fabric implementation requirements, and QA gates.
 ---
 
 # Entity Design Expert
 
 ## Overview
 
-Own the complete entity production loop: concept -> official reference -> model/texture -> animation -> Fabric code/resources -> runtime verification. Use this as the orchestrator for high-quality mobs; delegate implementation details to existing ModFactory skills.
+Entity Design Expert is the Entity Module lead in ModFactory. It owns the entity concept, mechanics, runtime requirements, and entity contract. It coordinates shared asset services and Fabric engineering, but does not personally own texture creation, model editing, animation authoring, or implementation code.
 
-**Required sub-skills:** `entity-designer`, `blockbench-animator`, `entity-generator`, `integrity-checker`, `auto-fix`.
+**Required collaborators:** `entity-designer`, Asset Source, Texture Material, Model Rig, Animation, Technical Art, `entity-generator`, `integrity-checker`, `auto-fix`.
+
+Use `core/architecture.md`, `core/contracts.md`, `core/specialists/registry.md`, and `core/workflows/entity-production.md` as the source of truth. Legacy docs can provide implementation history, but core owns the module boundaries.
 
 ## Core Rule
 
@@ -18,12 +20,12 @@ Do not let model, texture, animation, and code drift apart.
 Every entity must have a single source-of-truth asset contract:
 
 ```text
-reference entity + texture size + UV layout + part names + animation names + entity dimensions
+entity identity + mechanics + reference entity + texture size + UV layout + part names + animation states + runtime triggers + entity dimensions
 ```
 
 If any one changes, re-check all others before running the game.
 
-For the complete contract schema, see `asset-contract-reference.md`.
+For the complete contract schema, see `core/contracts.md`.
 
 ## Workflow
 
@@ -38,9 +40,9 @@ Start with `entity-designer`. The blueprint must include:
 - Required clips: idle, walk, attack, hurt, death, special, spawn.
 - Runtime features: spawn egg, boss bar, drops, biome spawning, summon method.
 
-### 2. Find Official Reference Assets
+### 2. Assign Asset Source Work
 
-Prefer official Minecraft assets when adapting a vanilla-shaped mob.
+Prefer official Minecraft assets when adapting a vanilla-shaped mob. Entity Design Expert records what sources are required; Asset Source performs lookup/export and records provenance.
 
 Search order:
 
@@ -49,7 +51,7 @@ Search order:
 3. Minecraft/client source or asset cache when available.
 4. Blockbench model library or a user-provided `.bbmodel`.
 
-When a `.bbmodel` has embedded textures, export the embedded texture directly instead of regenerating it:
+When a `.bbmodel` has embedded textures, Asset Source should export the embedded texture directly instead of regenerating it:
 
 ```powershell
 $json = Get-Content -Raw model.bbmodel | ConvertFrom-Json
@@ -60,9 +62,9 @@ if ($src -match ",") { $src = $src.Substring($src.IndexOf(",") + 1) }
   [Convert]::FromBase64String($src))
 ```
 
-### 3. Theme Retexture Without Breaking UV
+### 3. Assign Texture Material Work
 
-Never resize a texture to hide UV bugs. Retexture in the same dimensions and same UV layout as the model.
+Entity Design Expert sets the visual direction and acceptance criteria. Texture Material performs the actual retheme. Never resize a texture to hide UV bugs. Retexture in the same dimensions and same UV layout as the model.
 
 Good transformations:
 
@@ -77,9 +79,9 @@ Bad transformations:
 - Repainting from scratch without checking UV islands.
 - Exporting a texture from one `.bbmodel` while using Java geometry from another.
 
-### 4. Adapt Model Geometry to the Texture
+### 4. Assign Model Rig Work
 
-Model geometry must match the texture's UV layout.
+Model Rig owns Blockbench structure, part names, dimensions, UV layout, and Java model expectations. Entity Design Expert records the required geometry and accepts/rejects the result.
 
 For vanilla-shaped entities:
 
@@ -95,9 +97,9 @@ When converting Blockbench coordinates:
 - If a model looks tiny, check both Java cuboid heights and entity dimensions.
 - If a model has holes, check UV size/layout before changing the texture.
 
-### 5. Generate Animations in Blockbench
+### 5. Assign Animation Work
 
-Use `blockbench-animator` after the model is open.
+Use the Animation service through `blockbench-animator` after the model is open. Entity Design Expert defines the required action set and runtime trigger requirements; Animation authors clips and reports clip metadata.
 
 Required verification:
 
@@ -107,18 +109,18 @@ Required verification:
 - One-shot attack/hurt/death/spawn clips.
 - Verify keyframe counts and clip lengths after writing.
 
-For heavy golems:
+For heavy golems, request:
 
 - Walk: slow, weighty, opposite legs, small arm swing.
 - Idle: minimal breathing and subtle head motion.
 - Attack: anticipation -> impact -> recovery.
 - Death: heavy collapse, no floaty bounce.
 
-### 6. Generate Game Files
+### 6. Assign Fabric Engineering Work
 
-Use `entity-generator` only after the asset contract is stable.
+Use `entity-generator` only after the entity contract and required asset/animation outputs are stable.
 
-Generate the full closure:
+Fabric Engineering generates the full closure:
 
 - `EntityType` registration and attributes.
 - Entity AI/mechanics class.
@@ -130,6 +132,7 @@ Generate the full closure:
 - Loot table or explicit no-drop decision.
 - Creative tab entry.
 - Optional boss bar, biome spawn rules, summon item, sounds, particles.
+- Runtime animation triggers, e.g. successful melee attack, damage taken, death, spawn, and named special goals.
 
 ### 7. Verify Runtime, Not Just Build
 
@@ -148,14 +151,15 @@ If `build` passes but `runClient` fails, treat it as incomplete. Entity renderin
 For a complex entity request:
 
 ```text
-entity-design-expert
-  -> entity-designer: complete blueprint and asset contract
-  -> official asset search/export: reference model and texture source
-  -> theme retexture: same dimensions, same UV
-  -> model adaptation: Java geometry + texture size + entity dimensions
-  -> blockbench-animator: animation clips
+mc-mod-master
+  -> entity-design-expert: entity concept, mechanics, contract, acceptance criteria
+  -> Asset Source: official/Blockbench source discovery and provenance
+  -> Texture Material: UV-safe entity texture variants and vanilla-derived item icons
+  -> Model Rig: model structure, part names, dimensions, UV layout
+  -> Animation: clips plus runtime trigger map
+  -> Technical Art: render state, model binding, texture identifiers, animation state mapping
   -> entity-generator: Fabric code/resources
-  -> integrity-checker: resource closure
+  -> integrity-checker: contract/resource closure
   -> auto-fix: compile/runtime errors
   -> runClient: final verification
 ```
@@ -174,11 +178,14 @@ entity-design-expert
 ## Acceptance Checklist
 
 - [ ] Blueprint approved and complete.
-- [ ] Official/reference asset source recorded.
+- [ ] Entity contract records mechanics, runtime dimensions, spawn egg id, loot intent, and required animation states.
+- [ ] Official/reference asset source and provenance are recorded by Asset Source.
+- [ ] Texture Material output records whether each texture is UV-safe, vanilla-derived, or novel generated.
 - [ ] Texture dimensions match model texture size.
-- [ ] Java model geometry matches reference proportions.
+- [ ] Model Rig output confirms Java model geometry matches reference proportions.
 - [ ] Entity dimensions match intended in-game scale.
-- [ ] Animation clip names recorded and verified.
+- [ ] Animation clip names, loop flags, and runtime triggers are recorded and verified.
+- [ ] Technical Art confirms render state, model part names, texture identifiers, and animation state mapping.
 - [ ] Spawn egg works for custom entity.
 - [ ] Renderer, model layer, texture, lang, loot, creative tab all exist.
 - [ ] `gradlew build` passes.

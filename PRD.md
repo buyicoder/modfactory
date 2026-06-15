@@ -1,33 +1,36 @@
 # ModFactory 详细需求文档 V1.0
 
+> Status: This is an early product requirements document. The current source of truth is the platform-neutral `core/` playbook plus thin runtime adapters under `adapters/`.
+
 ## 1. 项目概述
 
 ### 1.1 项目定位
 - **全称**: ModFactory
-- **类型**: Claude Code 专属 AI 插件
-- **核心定位**: 模块化、渐进式 MC 模组开发工具链
+- **类型**: 平台无关的 Minecraft game-experience factory，Claude Code/Cursor/通用 Agent 通过 adapters 接入
+- **核心定位**: 模块化、契约驱动、渐进式 MC 模组与整合包生产工具链
 - **区别于 CreativeMode**: 输出完整可编辑源码，非黑盒一键出包
 
 ### 1.2 核心架构
 ```
-1 Master Skill (调度) + N Sub-Skills (原子工具) + Templates (代码模板)
+core/ 平台无关 playbook + adapters/ 运行时适配器 + skills/ 专家实现 + templates/scripts 工具链
 ```
 
 ### 1.3 核心差异化
 - 输出完整可编译源码（Java/JSON/PNG/工程结构）
 - 模块化工具解耦：纹理、物品、玩法、实体可单独使用
 - 总Skill全局调度，一句话自动拆解复杂需求
-- 基于Claude Code原生插件规范，可本地加载、可开源分发
+- 核心流程不绑定单一 Agent 平台，可通过薄适配器本地加载、复用、开源分发
 
 ## 2. 架构设计
 
 ### 2.1 架构模式
-主控调度层（mc-mod-master）+ 原子工具层（多个子Skill）
+平台无关核心（core）+ 平台适配层（adapters）+ 主控调度层（mc-mod-master 等入口）+ 专家模块/资产服务/工程实现/QA Gates
 
 ### 2.2 目录结构
 ```
 modfactory/
-├── .claude-plugin/plugin.json
+├── core/               (平台无关定位、架构、契约、工作流、专家注册表)
+├── adapters/           (Cursor / Claude Code / Generic Agent 薄适配器)
 ├── skills/
 │   ├── mc-mod-master/SKILL.md
 │   ├── texture-generator/SKILL.md

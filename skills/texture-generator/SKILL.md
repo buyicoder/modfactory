@@ -9,6 +9,31 @@ description: Use when the user needs Minecraft item textures, block textures, ar
 
 Generates Minecraft-style pixel art textures for items, blocks, and armor using the GearFactory engine. Supports 20 color palettes and multiple shape templates. Outputs standard 16x16 item icons and 64x32 armor equipment textures.
 
+In ModFactory architecture this skill serves the Texture Material service. Use `core/contracts.md` and `core/specialists/registry.md` as the source of truth for asset provenance. When a texture has meaningful source provenance or must be derived from vanilla art, record the expected source and transform in an `asset.contract.json` or equivalent artifact.
+
+## Entity UV Sheet Boundary
+
+Do not use this skill as the default path for entity UV sheets. Entity textures must preserve a model-specific UV layout, texture dimensions, and alpha channel. For mobs and bosses, route texture work through:
+
+1. `entity-design-expert` to establish the entity asset contract.
+2. `scripts\export-bbmodel-assets.ps1` to extract the reference texture.
+3. `scripts\texture-variant-engine.ps1` to apply deterministic theme variants.
+4. `scripts\validate-entity-assets.ps1` to verify the texture still matches the contract.
+
+Use this skill for entity work only when creating concept art or non-UV item/block/equipment assets that will not be wired directly to an entity model.
+
+## Vanilla-Derived Asset Boundary
+
+If a requested texture is a themed version of an existing Minecraft item shape, prefer the Asset Source + Texture Material route over drawing from scratch:
+
+```powershell
+powershell -File scripts\derive-vanilla-item-texture.ps1 -MinecraftClientJar <path-to-minecraft-client.jar> -VanillaTexture iron_ingot -OutputPath src\main\resources\assets\modid\textures\item\dark_iron_ingot.png -Palette dark-iron
+```
+
+Examples: spawn eggs, ingots, nuggets, gems, sticks, rods, tools, armor item icons, and vanilla-shaped blocks.
+
+Only use novel generation when no close vanilla or project source exists, or when the user explicitly requests a new shape.
+
 ## GearFactory Engine
 
 Located at `forge_engine/` in the mod project. If not present, clone from https://github.com/buyicoder/GearFactory.

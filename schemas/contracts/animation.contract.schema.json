@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modfactory.local/schemas/contracts/animation.contract.schema.json",
+  "title": "ModFactory Animation Contract",
+  "type": "object",
+  "required": ["schemaVersion", "animationId", "target", "clips"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "animationId": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$" },
+    "target": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$" },
+    "clips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "loop", "lengthSeconds", "runtimeTrigger"],
+        "properties": {
+          "name": { "type": "string" },
+          "loop": { "type": "boolean" },
+          "lengthSeconds": { "type": "number", "minimum": 0 },
+          "runtimeTrigger": { "type": "string" },
+          "requiredRuntimeState": { "type": "string" }
+        }
+      }
+    }
+  }
+}

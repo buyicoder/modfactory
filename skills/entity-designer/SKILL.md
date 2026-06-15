@@ -86,6 +86,7 @@ Before generating code, verify:
 - [ ] Texture palette is chosen
 - [ ] Sound strategy is decided
 - [ ] Spawn method is clear
+- [ ] Entity asset contract fields are ready: `entityId`, texture path/size/source, model Java path/texture size/parts, renderer Java path/texture identifier, runtime `entityTypeField`, dimensions, spawn egg id, boss bar flag, and animations
 ```
 
 ## Quality Gates
@@ -97,7 +98,7 @@ All 9 sections filled with specific values (no "TBD" or "maybe").
 Present the blueprint to user. Wait for explicit approval before proceeding.
 
 ### Gate 3: Generation Ready
-Blueprint passed to `entity-generator` which now knows exactly what to build.
+Blueprint passed to `entity-generator` with an entity asset contract draft. Code generation must not start until the contract records texture dimensions, model parts, renderer texture identifier, runtime dimensions, spawn egg id, and loot/no-drop intent.
 
 ## Integration with ModFactory Pipeline
 
@@ -107,9 +108,9 @@ User: "I want a thunder golem"
     ▼
 entity-design-expert ← ORCHESTRATES COMPLETE ENTITY LOOP
     │
-    ├── Establish source-of-truth asset contract
+    ├── Establish source-of-truth asset contract before code generation
     ├── Search/export official reference model and texture
-    ├── Preserve texture dimensions and UV layout during retheme
+    ├── Preserve texture dimensions, alpha, and UV layout during retheme
     ├── Adapt Java model geometry and entity dimensions
     └── Own runtime verification
     │
@@ -140,7 +141,8 @@ blockbench-animator ← ANIMATION CLIPS
     ▼
 entity-generator ← RECEIVES COMPLETE BLUEPRINT + EXPORTED CODE/ANIMATION NAMES
     │
-    ├── Model code → from blockbench-mcp export
+    ├── Contract → required source of truth for texture/model/renderer/runtime files
+    ├── Model code → from blockbench-mcp export or validated template
     ├── Animations → from blockbench-animator clip list
     ├── Texture → from blockbench-mcp or GearFactory
     ├── Sounds → ModSounds + sound JSONs
@@ -150,7 +152,7 @@ entity-generator ← RECEIVES COMPLETE BLUEPRINT + EXPORTED CODE/ANIMATION NAMES
     ▼
 integrity-checker ← VERIFIES COMPLETENESS
     │
-    └── Checks: All blueprint items have corresponding files
+    └── Checks: contract resources, spawn egg closure, lang, loot, renderer/model texture linkage
 ```
 
 ### Blockbench Integration

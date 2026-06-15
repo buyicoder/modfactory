@@ -7,18 +7,24 @@ description: Use when the user wants to create a complete Minecraft mod, add a n
 
 ## Overview
 
-The single entry point for all MC mod development. Decomposes natural language requests into atomic tasks, dispatches to specialized sub-skills in correct dependency order, and assembles the output into a complete, compilable mod project.
+The Claude Code compatibility entry point for ModFactory. Decomposes natural language requests into domain modules, shared asset services, Fabric engineering tasks, and verification gates, while treating the platform-neutral `core/` playbook as the source of truth.
 
 **REQUIRED SUB-SKILLS:** When dispatching, always use the appropriate sub-skill:
+- `experience-director` for broad gameplay direction, player journey, project mode routing, system design, and modpack concepts
+- `conflict-expert` for modpack compatibility checks, dependency graphs, mixin/log conflicts, duplicate content, and integration resolution plans
 - `texture-generator` for textures
 - `item-generator` for items/tools/weapons/armor
 - `block-generator` for blocks
-- `entity-design-expert` for polished custom mobs/bosses with reference assets, model adaptation, textures, animations, and runtime verification
-- `entity-generator` for entities
-- `blockbench-animator` for Blockbench entity animation clips
+- `entity-design-expert` for Entity Module design, mechanics, contract ownership, and acceptance criteria
+- `entity-generator` for Fabric entity code, renderer wiring, registry, AI goals, and runtime animation bindings
+- `blockbench-animator` for Animation service clips and clip verification
 - `gameplay-generator` for gameplay systems
 
 **REQUIRED KNOWLEDGE:** `fabric-mc-mod-development` skill for API patterns, mappings, and conventions.
+
+**CORE SOURCE:** Read `core/README.md`, `core/positioning.md`, `core/architecture.md`, `core/contracts.md`, `core/specialists/registry.md`, `core/workflows/README.md`, and the workflow selected by that index before major work.
+
+**ARCHITECTURE SOURCE:** `core/` is platform-neutral. `docs/modfactory-positioning.md` and `docs/modfactory-architecture.md` remain implementation-era references. The master orchestrator owns routing, dispatch, and closure, not every production detail.
 
 ## Workflow
 
@@ -35,23 +41,23 @@ User: "Create a legendary frost sword that freezes enemies"
                 │
         ┌───────▼────────┐
         │ 2. Decompose    │
-        │  Task A: texture │ → texture-generator
-        │  Task B: item    │ → item-generator
-        │  Task C: ability │ → item-generator (special)
+        │  Domain module  │
+        │  Asset services │
+        │  Contracts      │
         └───────┬────────┘
                 │
         ┌───────▼────────┐
         │ 3. Execute      │
-        │  Run each sub-  │
-        │  skill in order │
-        │  (texture FIRST)│
+        │  Source assets  │
+        │  Produce code   │
+        │  Bind resources │
         └───────┬────────┘
                 │
         ┌───────▼────────┐
         │ 4. Assemble     │
         │  Merge all files│
         │  into project   │
-        │  Check integrity│
+        │  Verify gates   │
         └───────┬────────┘
                 │
         ┌───────▼────────┐
@@ -64,11 +70,33 @@ User: "Create a legendary frost sword that freezes enemies"
 
 ## Task Decomposition Rules
 
+### Module Dispatch (MUST decide first)
+
+Every request must be decomposed into:
+
+1. Project mode: Original Design Mode, Modpack Author Mode, Focused Mod Mode, or hybrid.
+2. System modules: combat, progression, economy/loot, tech, magic, worldgen, quests, balance, if needed.
+3. Domain modules: entity, item, block, gameplay, worldgen, GUI, command, or mixed.
+4. Shared asset services: Asset Source, Texture Material, Model Rig, Animation, Technical Art.
+5. Fabric engineering or modpack integration tasks.
+6. Contracts: experience, system, feature, entity, asset, animation, modpack manifest, as needed.
+7. Verification gates: contract validators, integrity check, build, runClient QA, launch matrix, playtest checks.
+
+If a request describes a whole game loop, progression system, combat/tech/magic design, or modpack concept, route through `experience-director` before specialists.
+
+Do not treat assets as complete because PNG files exist. If source provenance matters, require an asset contract or an equivalent documented source rule.
+
+For non-Claude runtimes, use `adapters/cursor/`, `adapters/claude-code/`, or `adapters/generic-agent/` as thin wrappers over the same `core/` workflow.
+
 ### Execution Order (MUST follow)
-1. **Texture FIRST** — items reference textures, so textures must exist first
-2. **Registration foundation** — ModItems.java / ModBlocks.java before items that use them
-3. **JSON resources** — models, recipes, tags after Java code
-4. **Creative inventory** — ItemGroupEvents after all items registered
+1. **Experience direction first for broad requests** — define player journey, mode, systems, and constraints.
+2. **Plan modules and contracts** — know the required artifacts before writing files.
+3. **Asset source before asset output** — choose vanilla, Blockbench, generated, mod reuse, or user-provided sources.
+4. **Texture/model/animation before runtime binding** — assets define dimensions, part names, clip names, and triggers.
+5. **Registration foundation** — ModItems.java / ModBlocks.java / ModEntityTypes.java before resources that reference them.
+6. **JSON resources** — models, recipes, tags, loot, lang after ids are stable.
+7. **Creative inventory** — ItemGroupEvents after all registered content exists.
+8. **Verification gates** — contract validation, integrity check, build, runClient QA, or modpack launch matrix.
 
 ### Version Detection
 Check `gradle.properties` for `minecraft_version`. If not found, ask user.
@@ -160,19 +188,32 @@ When dispatching to sub-skills, ALWAYS pass the selected architecture pattern.
 → gameplay-generator: magic system if user wants mana/cooldown
 ```
 
+### Modpack Author Request
+```
+"Make a tech RPG modpack around existing mods and check conflicts"
+→ experience-director: pack fantasy, player journey, Modpack Author Mode
+→ Mod Discovery: candidate mods by system category and version/loader
+→ conflict-expert: dependency graph, compatibility graph, conflict report
+→ Integration Expert: configs, datapacks, tags, recipes, scripts, or glue mod plan
+→ QA: empty launch, world creation, progression smoke test, conflict scenario test, performance pass
+```
+
+If existing mods satisfy the intended experience, do not generate custom replacements by default. Generate custom content only for unique identity, missing glue, or gaps that existing mods cannot cover.
+
 **Architecture Context Format:** When dispatching, include `[architecture=<pattern>]` so sub-skills know WHERE to put generated code.
 
 ### Custom Entity with Animations
 ```
 "Make a stone guardian mob with heavy walking and slam attack animations"
-→ entity-design-expert: own full asset/code/runtime loop
-  → entity-designer: blueprint + asset contract
-  → official asset search/export: reference model, texture size, UV layout
-  → theme retexture: same dimensions, same UV layout
-  → model adaptation: Java geometry + entity dimensions
-  → blockbench-animator: idle, walk, attack, hurt, death clips
+→ Domain: Entity Module
+  → entity-design-expert: concept, mechanics, entity contract, acceptance criteria
+  → Asset Source: official/Blockbench reference model, texture size, UV layout, provenance
+  → Texture Material: UV-safe entity texture variant + vanilla-derived spawn egg if a source exists
+  → Model Rig: `.bbmodel`, part names, Java geometry expectations, entity dimensions
+  → Animation: idle, walk, attack, hurt, death clips + runtime trigger map
+  → Technical Art: render state fields, model part binding, texture identifiers, animation state mapping
   → entity-generator: entity logic + renderer + runtime animation bindings [architecture=<pattern>]
-  → integrity-checker + build + runClient verification
+  → QA: validate-entity-assets + integrity-checker + build + runClient verification
 ```
 
 ## MCP Integration (v3.1)
@@ -197,15 +238,20 @@ mcdev-mcp tools:
 
 ## Phase 3: Closed-Loop Pipeline
 
-After generating all code and resources, ModFactory runs the build→fix→rebuild loop:
+After generating all code and resources, ModFactory runs the closure→build→fix→rebuild loop:
 
 ```
 1. GENERATE all code + resources
-2. BUILD: gradlew build
-   ├── SUCCESS → 5. OUTPUT complete project
-   └── FAILED → 3. AUTO-FIX
-3. AUTO-FIX: Parse errors → apply known fixes
-4. REBUILD: gradlew build (go to step 2)
+2. CLOSURE GATE:
+   - scripts\validate-entity-assets.ps1 for each entity contract
+   - scripts\integrity-check.ps1 for project-wide resources
+   ├── SUCCESS → 3. BUILD
+   └── FAILED → 4. AUTO-FIX
+3. BUILD: gradlew build
+   ├── SUCCESS → 6. OUTPUT complete project
+   └── FAILED → 4. AUTO-FIX
+4. AUTO-FIX: Parse closure/build errors → apply known fixes
+5. RECHECK: integrity-check then gradlew build (go to step 2)
    (max 5 iterations, then escalate to user)
 ```
 

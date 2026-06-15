@@ -9,6 +9,8 @@ description: Use when creating, editing, or verifying Minecraft entity animation
 
 Creates production-ready entity animations in the currently open Blockbench model through the Blockbench MCP server. Use this after the model/rig exists and before exporting the final entity assets.
 
+In ModFactory architecture this skill serves the Animation service. Use `core/contracts.md`, `core/specialists/registry.md`, and `core/workflows/entity-production.md` as the source of truth for animation handoff. It produces clip metadata that Fabric Engineering must bind to runtime triggers. Animation work is incomplete if the clips exist but the trigger map is missing.
+
 ## Required Setup
 
 Blockbench MCP is expected at:
@@ -136,6 +138,8 @@ entity-designer
 ```
 
 Record the created clip names in the entity blueprint so code generation can bind states like walking, attacking, hurt, death, and spawn.
+
+For contract shape and stable trigger names, see `core/contracts.md`.
 
 ## Common Mistakes
 

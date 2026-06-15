@@ -8,15 +8,15 @@
   },
   "texture": {
     "path": "src/main/resources/assets/modid/textures/entity/dark_iron_golem.png",
-    "width": 128,
-    "height": 128,
+    "width": 1,
+    "height": 1,
     "source": "embedded-bbmodel"
   },
   "model": {
     "javaPath": "src/client/java/com/example/client/model/DarkIronGolemEntityModel.java",
-    "textureWidth": 128,
-    "textureHeight": 128,
-    "parts": ["head", "body", "right_arm", "left_arm", "right_leg", "left_leg"]
+    "textureWidth": 1,
+    "textureHeight": 1,
+    "parts": ["head", "body"]
   },
   "renderer": {
     "javaPath": "src/client/java/com/example/client/renderer/DarkIronGolemEntityRenderer.java",
