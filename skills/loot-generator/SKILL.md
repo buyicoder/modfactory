@@ -92,7 +92,8 @@ What needs loot?
               "count": { "type": "minecraft:uniform", "min": 2, "max": 5 }
             },
             {
-              "function": "minecraft:looting_enchant",
+              "function": "minecraft:enchanted_count_increase",
+              "enchantment": "minecraft:looting",
               "count": { "type": "minecraft:uniform", "min": 0, "max": 2 }
             }
           ]
@@ -149,7 +150,7 @@ What needs loot?
 | Function | Purpose | Key Parameters |
 |----------|---------|---------------|
 | `set_count` | Set stack count | `count: {min, max}` |
-| `looting_enchant` | Extra drops with Looting | `count: {min, max}` |
+| `enchanted_count_increase` | Extra drops with Looting | `enchantment`, `count: {min, max}` |
 | `apply_bonus` | Fortune bonus | `enchantment`, `formula` |
 | `set_damage` | Damaged item | `damage: {min, max}` |
 | `set_nbt` | Set NBT tag | `tag: "{...}"` |

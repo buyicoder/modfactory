@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ModFactory — Minecraft 模组工业革命</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{mono:['JetBrains Mono','Fira Code','monospace'],sans:['Inter','system-ui','sans-serif']}}}}</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+  .gradient-text { background: linear-gradient(135deg,#a78bfa,#60a5fa,#34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .glow { box-shadow: 0 0 80px -20px rgba(139,92,246,0.3); }
+  ::selection { background: rgba(139,92,246,0.3); }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans antialiased">
+
+<!-- Hero -->
+<header class="min-h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.08),transparent_70%)]"></div>
+  <div class="relative z-10 max-w-4xl">
+    <p class="font-mono text-sm text-violet-400 tracking-[0.2em] mb-6">GAMEPLAY EXPERIENCE FACTORY</p>
+    <pre class="font-mono text-[10px] sm:text-xs text-violet-500/60 leading-tight mb-8 select-none">
+███╗   ███╗  ██████╗  ██████╗     ███████╗  █████╗   ██████╗ ████████╗  ██████╗  ██████╗  ██╗   ██╗
+████╗ ████║ ██╔═══██╗ ██╔══██╗    ██╔════╝ ██╔══██╗ ██╔════╝ ╚══██╔══╝ ██╔═══██╗ ██╔══██╗ ╚██╗ ██╔╝
+██╔████╔██║ ██║   ██║ ██║  ██║    █████╗   ███████║ ██║         ██║    ██║   ██║ ██████╔╝  ╚████╔╝
+██║╚██╔╝██║ ██║   ██║ ██║  ██║    ██╔══╝   ██╔══██║ ██║         ██║    ██║   ██║ ██╔══██╗   ╚██╔╝
+██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝    ██║      ██║  ██║ ╚██████╗    ██║    ╚██████╔╝ ██║  ██║    ██║
+╚═╝     ╚═╝  ╚═════╝  ╚═════╝     ╚═╝      ╚═╝  ╚═╝  ╚═════╝    ╚═╝     ╚═════╝  ╚═╝  ╚═╝    ╚═╝
+                                ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+                                ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
+                                █████╗  ███████║██║        ██║   ██║   ██║██████╔╝ ╚████╔╝
+                                ██╔══╝  ██╔══██║██║        ██║   ██║   ██║██╔══██╗  ╚██╔╝
+                                ██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║   ██║
+                                ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   </pre>
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-4"><span class="gradient-text">一句话</span>生成 Minecraft 模组</h1>
+    <p class="text-lg text-zinc-400 max-w-xl mx-auto mb-10">从创意到可编译、可运行的完整 Fabric 模组。<br>不是代码生成器——是游戏体验工厂。</p>
+    <div class="flex gap-4 justify-center flex-wrap">
+      <a href="#install" class="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-lg transition-colors">立即开始</a>
+      <a href="https://github.com/buyicoder/modfactory" class="px-6 py-3 border border-zinc-700 hover:border-zinc-500 text-zinc-300 font-medium rounded-lg transition-colors">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<!-- Numbers -->
+<section class="py-20 px-6">
+  <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <div><div class="text-3xl font-bold text-violet-400">25</div><div class="text-sm text-zinc-500 mt-1">专家 Skill</div></div>
+    <div><div class="text-3xl font-bold text-blue-400">1</div><div class="text-sm text-zinc-500 mt-1">一句话触发</div></div>
+    <div><div class="text-3xl font-bold text-emerald-400">512</div><div class="text-sm text-zinc-500 mt-1">维语义检索</div></div>
+    <div><div class="text-3xl font-bold text-amber-400">MIT</div><div class="text-sm text-zinc-500 mt-1">开源协议</div></div>
+  </div>
+</section>
+
+<!-- Pipeline -->
+<section class="py-20 px-6 border-t border-zinc-800">
+  <div class="max-w-4xl mx-auto">
+    <p class="font-mono text-sm text-violet-400 tracking-[0.2em] mb-4">ENTITY PIPELINE</p>
+    <h2 class="text-2xl font-semibold mb-8">实体管线——从创意到可运行</h2>
+    <div class="font-mono text-sm text-zinc-400 flex flex-wrap gap-2">
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">💡 点子</span>
+      <span class="text-zinc-600 self-center">→</span>
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">📐 设计蓝图</span>
+      <span class="text-zinc-600 self-center">→</span>
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">🧊 Blockbench</span>
+      <span class="text-zinc-600 self-center">→</span>
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">📋 资产合约</span>
+      <span class="text-zinc-600 self-center">→</span>
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">☕ Fabric 代码</span>
+      <span class="text-zinc-600 self-center">→</span>
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">✅ 完整性校验</span>
+      <span class="text-zinc-600 self-center">→</span>
+      <span class="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded">▶️ runClient QA</span>
+    </div>
+  </div>
+</section>
+
+<!-- Texture Engine -->
+<section class="py-20 px-6 border-t border-zinc-800 bg-zinc-900/50">
+  <div class="max-w-4xl mx-auto">
+    <p class="font-mono text-sm text-emerald-400 tracking-[0.2em] mb-4">TEXTURE ENGINE</p>
+    <h2 class="text-2xl font-semibold mb-4">纹理不是下载的——是算出来的</h2>
+    <p class="text-zinc-400 mb-8 leading-relaxed">20 种色板 × 6 种形状。每一像素都是程序化生成。从色板定义到 16×16 PNG 到模型 JSON 引用路径，全自动。</p>
+    <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-6 font-mono text-sm">
+      <span class="text-zinc-500"># 生成全套红宝石装备纹理</span><br>
+      <span class="text-emerald-400">./forge.ps1</span> <span class="text-violet-300">-PaletteName</span> ruby <span class="text-violet-300">-Shape</span> vanilla <span class="text-violet-300">-ItemName</span> all
+    </div>
+  </div>
+</section>
+
+<!-- Showcase -->
+<section class="py-20 px-6 border-t border-zinc-800">
+  <div class="max-w-4xl mx-auto">
+    <p class="font-mono text-sm text-amber-400 tracking-[0.2em] mb-4">SHOWCASE</p>
+    <h2 class="text-2xl font-semibold mb-8">Ruby & Thunder 模组</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-center"><div class="text-2xl mb-1">⚔️</div><div class="text-sm text-zinc-400">红宝石剑</div></div>
+      <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-center"><div class="text-2xl mb-1">🛡️</div><div class="text-sm text-zinc-400">红宝石护甲</div></div>
+      <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-center"><div class="text-2xl mb-1">⚡</div><div class="text-sm text-zinc-400">雷击剑·100%闪电</div></div>
+      <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-center"><div class="text-2xl mb-1">🤖</div><div class="text-sm text-zinc-400">暗铁傀儡</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Install -->
+<section id="install" class="py-20 px-6 border-t border-zinc-800 glow">
+  <div class="max-w-4xl mx-auto text-center">
+    <p class="font-mono text-sm text-violet-400 tracking-[0.2em] mb-4">INSTALL</p>
+    <h2 class="text-2xl font-semibold mb-8">一行命令，全部就绪</h2>
+    <div class="bg-zinc-950 border border-zinc-700 rounded-lg p-6 font-mono text-sm text-left max-w-lg mx-auto">
+      <span class="text-violet-300">git clone</span> <span class="text-zinc-300">https://github.com/buyicoder/modfactory.git</span><br>
+      <span class="text-violet-300">cd</span> <span class="text-zinc-300">modfactory</span><br>
+      <span class="text-violet-300">install.bat</span>
+    </div>
+    <p class="text-zinc-500 text-sm mt-6">然后对你的 AI Agent 说：<br><code class="text-violet-300 bg-zinc-900 px-2 py-0.5 rounded">/mc-mod-master 创建一把能召唤闪电的红宝石剑</code></p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 px-6 border-t border-zinc-800 text-center text-sm text-zinc-600">
+  <p>ModFactory · <a href="https://github.com/buyicoder/modfactory" class="hover:text-zinc-400 transition-colors">GitHub</a> · MIT License</p>
+  <p class="mt-2 text-zinc-700">Made with ❤️ by <a href="https://github.com/buyicoder" class="hover:text-zinc-400">buyicoder</a></p>
+</footer>
+
+</body>
+</html>

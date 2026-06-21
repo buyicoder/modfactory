@@ -1,7 +1,7 @@
 {
   "name": "modfactory",
   "version": "3.0.0",
-  "description": "ModFactory v2.0 - Modular Minecraft mod development agent for Claude Code. Closed-loop build→fix→rebuild pipeline. 8 skills covering texture/ item/block/entity/gameplay generation plus auto-fix repair.",
+  "description": "ModFactory v3.0 - Platform-neutral Minecraft mod development agent for Claude Code. Closed-loop build→fix→rebuild pipeline. 22 skills covering experience direction, design, texture/item/block/entity/gameplay generation, loot, recipes, worldgen, GUI, commands, datagen, networking, mixin, mod analysis, integrity checking, conflict resolution, and auto-fix repair.",
   "author": "buyicoder",
   "license": "MIT",
   "keywords": ["minecraft", "fabric", "forge", "modding", "texture", "equipment"],
@@ -12,8 +12,14 @@
       "skills/texture-generator/SKILL.md",
       "skills/item-generator/SKILL.md",
       "skills/block-generator/SKILL.md",
+      "skills/experience-director/SKILL.md",
+      "skills/entity-designer/SKILL.md",
+      "skills/entity-design-expert/SKILL.md",
       "skills/entity-generator/SKILL.md",
+      "skills/blockbench-animator/SKILL.md",
+      "skills/appearance-designer/SKILL.md",
       "skills/gameplay-generator/SKILL.md",
+      "skills/loot-generator/SKILL.md",
       "skills/auto-fix/SKILL.md",
       "skills/mod-analyzer/SKILL.md",
       "skills/recipe-generator/SKILL.md",
@@ -24,7 +30,9 @@
       "skills/datagen-generator/SKILL.md",
       "skills/network-generator/SKILL.md",
       "skills/integrity-checker/SKILL.md",
-      "skills/texture-ai-generator/SKILL.md"
+      "skills/conflict-expert/SKILL.md",
+      "skills/texture-ai-generator/SKILL.md",
+      "skills/fabric-mc-mod-development/SKILL.md"
     ],
     "mcp": {
       "config": "mcp/mcp-servers.json"
